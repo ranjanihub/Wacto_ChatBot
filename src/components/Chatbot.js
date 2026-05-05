@@ -1,14 +1,20 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Minus, Send, Bot, User, Copy, ThumbsUp, ThumbsDown, Check, CheckCheck } from 'lucide-react';
+import { Minus, Send, Bot, User, Check, CheckCheck } from 'lucide-react';
 import './Chatbot.css';
 
 export default function Chatbot() {
-  const [isOpen, setIsOpen] = useState(true); // Open by default for preview
+  const [isOpen, setIsOpen] = useState(false); // Hidden by default, opens on click
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestions, setSuggestions] = useState([
+    { text: "What is WhatsApp API?", emoji: "🤔" },
+    { text: "How does it work?", emoji: "⚙️" },
+    { text: "Pricing plans", emoji: "💰" },
+    { text: "Get started", emoji: "🚀" }
+  ]);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -45,8 +51,7 @@ export default function Chatbot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMsg.content,
-          history: messages,
-          language: 'en'
+          history: messages
         }),
       });
 
@@ -62,6 +67,11 @@ export default function Chatbot() {
       };
       
       setMessages(prev => [...prev, botMsg]);
+      
+      // Update suggestions based on the response
+      if (data.suggestions && data.suggestions.length > 0) {
+        setSuggestions(data.suggestions);
+      }
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, {
@@ -82,9 +92,13 @@ export default function Chatbot() {
         <button 
           className="chat-fab animate-fade-in" 
           onClick={toggleChat}
-          aria-label="Open chat"
+          aria-label="Open WhatsApp chat"
         >
-          <MessageCircle size={28} color="#fff" />
+          <img 
+            src="/logo.jpg" 
+            alt="WhatsApp Chat" 
+            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+          />
         </button>
       )}
 
@@ -124,16 +138,12 @@ export default function Chatbot() {
                   )}
                   
                   <div className={`message-bubble ${msg.role}`}>
-                    {msg.content}
-                    
-                    {msg.role === 'bot' && (
-                      <div className="bot-actions">
-                        <button className="bot-action-btn" title="Copy"><Copy size={14} /></button>
-                        <button className="bot-action-btn" title="Helpful"><ThumbsUp size={14} /></button>
-                        <button className="bot-action-btn" title="Not Helpful"><ThumbsDown size={14} /></button>
-                      </div>
+                    {msg.role === 'bot' ? (
+                      <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                    ) : (
+                      msg.content
                     )}
-
+                    
                     {msg.role === 'user' && (
                       <div className="user-avatar-overlay">
                         <User size={20} color="#e2e8f0" fill="currentColor" />
@@ -171,9 +181,15 @@ export default function Chatbot() {
           {/* Input Area */}
           <div className="chat-input-area">
             <div className="quick-actions">
-              <button className="action-chip" onClick={() => setInputMessage('What is WhatsApp API?')}>🤔 What is WhatsApp API?</button>
-              <button className="action-chip" onClick={() => setInputMessage('Pricing')}>💰 Pricing</button>
-              <button className="action-chip" onClick={() => setInputMessage('FAQs')}>🙋 FAQs</button>
+              {suggestions.map((suggestion, index) => (
+                <button 
+                  key={index} 
+                  className="action-chip" 
+                  onClick={() => setInputMessage(suggestion.text)}
+                >
+                  {suggestion.emoji} {suggestion.text}
+                </button>
+              ))}
             </div>
             <form onSubmit={handleSendMessage} className="input-form">
               <input

@@ -6,10 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup": "node setup.js",
+    "test-rag": "node test-rag.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@langchain/community": "^1.1.27",
+    "@langchain/core": "^1.1.44",
+    "@langchain/openai": "^1.4.5",
+    "cheerio": "^1.2.0",
+    "chromadb": "^3.4.3",
+    "franc-min": "^6.2.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.4",
     "openai": "^6.35.0",

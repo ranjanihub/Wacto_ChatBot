@@ -175,11 +175,33 @@
   margin-left: 40px;
 }
 
+.message-bubble.bot a {
+  color: #60a5fa;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.message-bubble.bot a:hover {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
 .message-bubble.user {
   background: #e2e8f0;
   color: #1f2937;
   border-radius: 16px 16px 0 16px;
   margin-right: 20px;
+}
+
+.message-bubble.user a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.message-bubble.user a:hover {
+  color: #1d4ed8;
+  text-decoration: none;
 }
 
 .user-avatar-overlay {
@@ -206,30 +228,7 @@
   color: #9ca3af;
   margin-top: 4px;
   justify-content: flex-end;
-  padding-right: 20px;
-}
-
-.bot-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #8b5cf6;
-  padding: 4px 8px;
-  border-radius: 12px;
-  position: absolute;
-  bottom: -12px;
-  right: 12px;
-}
-
-.bot-action-btn {
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding-right: 50px;
 }
 
 .chat-input-area {
