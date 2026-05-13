@@ -1,0 +1,161 @@
+import { NextResponse } from 'next/server';
+import { wactoRAG } from '@/lib/wacto-rag';
+
+/**
+ * NEW SIMPLIFIED CHAT API
+ * 
+ * Flow:
+ * 1. Receive message from chatbot UI
+ * 2. Send directly to n8n webhook
+ * 3. n8n processes with Ollama
+ * 4. Return response from n8n to chatbot
+ * 
+ * NO OpenAI calls - all AI processing via Ollama in n8n
+ */
+
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { message, history = [] } = body;
+
+    if (!message || !message.trim()) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
+
+    console.log('\n📨 === CHAT REQUEST ===');
+    console.log('User message:', message);
+    console.log('History length:', history.length);
+
+    // Get n8n webhook URL
+    const n8nWebhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+    
+    if (!n8nWebhookUrl) {
+      console.error('❌ n8n Webhook URL not configured!');
+      return NextResponse.json(
+        { 
+          error: 'n8n webhook not configured',
+          reply: 'System configuration error. Please contact support.'
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log('📤 Forwarding to n8n:', n8nWebhookUrl);
+
+    // Prepare payload for n8n
+    const payload = {
+      message: message.trim(),
+      history: history,
+      timestamp: new Date().toISOString(),
+      source: 'wacto-chatbot'
+    };
+
+    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+
+    // Send to n8n and wait for response
+    console.log('🔄 Sending to n8n and waiting for response...');
+    const n8nResponse = await fetch(n8nWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      timeout: 30000 // 30 second timeout
+    });
+
+    console.log('📥 n8n response status:', n8nResponse.status);
+
+    // Check if n8n response is successful
+    if (!n8nResponse.ok) {
+      const errorText = await n8nResponse.text();
+      console.error('❌ n8n error:', errorText);
+      
+      // If webhook not registered, workflow is likely inactive
+      if (n8nResponse.status === 404) {
+        return NextResponse.json({
+          error: 'Webhook not active',
+          reply: '⚠️ The AI system is currently offline. Please activate the n8n workflow.',
+          source: 'error'
+        }, { status: 503 });
+      }
+
+      return NextResponse.json({
+        error: 'n8n processing failed',
+        reply: 'Failed to process your message. Please try again.',
+        source: 'error'
+      }, { status: n8nResponse.status });
+    }
+
+    // Parse response from n8n
+    let n8nData;
+    try {
+      n8nData = await n8nResponse.json();
+      console.log('✅ n8n response data:', JSON.stringify(n8nData, null, 2));
+    } catch (error) {
+      const text = await n8nResponse.text();
+      console.warn('⚠️ Could not parse n8n JSON response:', text);
+      n8nData = { reply: text };
+    }
+
+    // Extract AI response from n8n
+    // n8n can return either { reply: "text" } or { message: "text" } or nested structure
+    let aiResponse = 
+      n8nData.reply || 
+      n8nData.message || 
+      n8nData.response ||
+      (n8nData.output ? n8nData.output.reply || n8nData.output.message : null) ||
+      JSON.stringify(n8nData);
+
+    if (!aiResponse) {
+      console.warn('⚠️ No response field found in n8n response');
+      console.log('Full n8n response:', n8nData);
+      aiResponse = 'Processing complete. Please try again for a response.';
+    }
+
+    console.log('✅ Final response to chatbot:', aiResponse.substring(0, 100));
+
+    // Return response to chatbot
+    return NextResponse.json({
+      reply: String(aiResponse).trim(),
+      source: 'n8n-ollama',
+      detectedLanguage: 'en',
+      suggestions: [
+        { text: "Tell me more", emoji: "📝" },
+        { text: "Ask a new question", emoji: "❓" },
+        { text: "Back to home", emoji: "🏠" }
+      ]
+    });
+
+  } catch (error) {
+    console.error('❌ Error in chat API:', error.message);
+    console.error('Stack:', error.stack);
+    
+    return NextResponse.json({
+      error: 'Internal server error',
+      reply: 'An unexpected error occurred. Please try again.',
+      source: 'error',
+      debug: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }, { status: 500 });
+  }
+}
+
+/**
+ * Health check endpoint
+ */
+export async function GET(req) {
+  const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+  
+  return NextResponse.json({
+    status: 'chat-api-running',
+    timestamp: new Date().toISOString(),
+    configuration: {
+      n8n_webhook_configured: !!webhookUrl,
+      ai_backend: 'n8n-ollama',
+      openai_usage: 'DISABLED - using Ollama instead'
+    },
+    workflow: {
+      status: 'Check n8n workflow toggle at top-right',
+      url: webhookUrl || 'NOT SET'
+    }
+  });
+}
