@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Minus, Send, Bot, User, Check, CheckCheck } from 'lucide-react';
+import { Minus, Send, Bot, User, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import './Chatbot.css';
 
 export default function Chatbot() {
@@ -9,16 +9,32 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [suggestions, setSuggestions] = useState([
-    { text: "What is WhatsApp API?", emoji: "🤔" },
-    { text: "How does it work?", emoji: "⚙️" },
-    { text: "Pricing plans", emoji: "💰" },
-    { text: "Get started", emoji: "🚀" }
+  const [isAtBottom, setIsAtBottom] = useState(true); // Track scroll position
+  const [chips, setChips] = useState([
+    { label: "What is WhatsApp API?", action: "message", value: "What is WhatsApp API?" },
+    { label: "How does it work?", action: "message", value: "How does it work?" },
+    { label: "Pricing plans", action: "message", value: "Tell me about pricing plans" },
+    { label: "Get started", action: "message", value: "How can I get started?" }
   ]);
   const messagesEndRef = useRef(null);
+  const chatMessagesRef = useRef(null); // Ref for messages container
+  const chipsContainerRef = useRef(null);
+  const chipsScrollRef = useRef(null);
+  const touchStartRef = useRef(null);
+  const scrollLeftRef = useRef(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setIsAtBottom(true);
+  };
+
+  // Check if user is at bottom of chat
+  const handleChatScroll = () => {
+    if (!chatMessagesRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = chatMessagesRef.current;
+    const isBottom = scrollHeight - scrollTop - clientHeight < 50; // 50px threshold
+    setIsAtBottom(isBottom);
   };
 
   useEffect(() => {
@@ -27,9 +43,21 @@ export default function Chatbot() {
 
   const toggleChat = () => setIsOpen(!isOpen);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputMessage.trim()) return;
+  // Handle chip click/action
+  const handleChipClick = (chip) => {
+    if (chip.action === 'url') {
+      window.open(chip.value, '_blank');
+    } else if (chip.action === 'message') {
+      setInputMessage(chip.value);
+    } else if (chip.action === 'send') {
+      // Send the message directly
+      sendMessage(chip.value);
+    }
+  };
+
+  // Send message (extracted for reuse)
+  const sendMessage = async (messageText) => {
+    if (!messageText.trim()) return;
 
     const now = new Date();
     const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -37,7 +65,7 @@ export default function Chatbot() {
     const userMsg = {
       id: Date.now(),
       role: 'user',
-      content: inputMessage,
+      content: messageText,
       timestamp: timeString
     };
 
@@ -55,9 +83,27 @@ export default function Chatbot() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to fetch response');
-      
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error('Failed to parse response JSON:', e);
+        data = { reply: 'Failed to parse server response' };
+      }
+
+      if (!response.ok) {
+        console.error('API returned error status:', response.status);
+        console.error('Error response:', data);
+        
+        const errorMsg = data.reply || `Server error: ${response.status}`;
+        setMessages(prev => [...prev, {
+          id: Date.now() + 1,
+          role: 'bot',
+          content: errorMsg,
+          timestamp: timeString
+        }]);
+        return;
+      }
       
       const botMsg = {
         id: Date.now() + 1,
@@ -68,9 +114,9 @@ export default function Chatbot() {
       
       setMessages(prev => [...prev, botMsg]);
       
-      // Update suggestions based on the response
-      if (data.suggestions && data.suggestions.length > 0) {
-        setSuggestions(data.suggestions);
+      // Update chips based on the response
+      if (data.chips && Array.isArray(data.chips) && data.chips.length > 0) {
+        setChips(data.chips);
       }
     } catch (error) {
       console.error("Chat error:", error);
@@ -83,6 +129,54 @@ export default function Chatbot() {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  // Handle horizontal scroll on chips
+  const handleChipsMouseDown = (e) => {
+    if (!chipsScrollRef.current) return;
+    touchStartRef.current = e.clientX;
+    scrollLeftRef.current = chipsScrollRef.current.scrollLeft;
+    chipsScrollRef.current.style.scrollBehavior = 'auto';
+  };
+
+  const handleChipsMouseMove = (e) => {
+    if (!touchStartRef.current || !chipsScrollRef.current) return;
+    const walk = (e.clientX - touchStartRef.current) * 1; // scroll-fast
+    chipsScrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleChipsMouseUp = () => {
+    touchStartRef.current = null;
+    if (chipsScrollRef.current) {
+      chipsScrollRef.current.style.scrollBehavior = 'smooth';
+    }
+  };
+
+  // Handle touch for mobile
+  const handleChipsTouchStart = (e) => {
+    if (!chipsScrollRef.current) return;
+    touchStartRef.current = e.touches[0].clientX;
+    scrollLeftRef.current = chipsScrollRef.current.scrollLeft;
+    chipsScrollRef.current.style.scrollBehavior = 'auto';
+  };
+
+  const handleChipsTouchMove = (e) => {
+    if (!touchStartRef.current || !chipsScrollRef.current) return;
+    const walk = (e.touches[0].clientX - touchStartRef.current) * 1;
+    chipsScrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleChipsTouchEnd = () => {
+    touchStartRef.current = null;
+    if (chipsScrollRef.current) {
+      chipsScrollRef.current.style.scrollBehavior = 'smooth';
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim()) return;
+    await sendMessage(inputMessage);
   };
 
   return (
@@ -124,7 +218,11 @@ export default function Chatbot() {
           </div>
 
           {/* Messages Area */}
-          <div className="chat-messages">
+          <div 
+            className="chat-messages"
+            ref={chatMessagesRef}
+            onScroll={handleChatScroll}
+          >
             <div className="message-list">
               {messages.map((msg) => (
                 <div key={msg.id} className={`message-wrapper ${msg.role}`}>
@@ -139,7 +237,14 @@ export default function Chatbot() {
                   
                   <div className={`message-bubble ${msg.role}`}>
                     {msg.role === 'bot' ? (
-                      <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: msg.content.replace(
+                            /(https?:\/\/[^\s]+)/g,
+                            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+                          ),
+                        }}
+                      />
                     ) : (
                       msg.content
                     )}
@@ -176,20 +281,46 @@ export default function Chatbot() {
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Auto-scroll to bottom button */}
+            {!isAtBottom && (
+              <button
+                className="scroll-to-bottom-btn"
+                onClick={scrollToBottom}
+                title="Scroll to latest messages"
+                aria-label="Scroll to latest messages"
+              >
+                <ChevronDown size={18} />
+              </button>
+            )}
           </div>
 
           {/* Input Area */}
           <div className="chat-input-area">
-            <div className="quick-actions">
-              {suggestions.map((suggestion, index) => (
-                <button 
-                  key={index} 
-                  className="action-chip" 
-                  onClick={() => setInputMessage(suggestion.text)}
-                >
-                  {suggestion.emoji} {suggestion.text}
-                </button>
-              ))}
+            {/* Horizontally Scrollable Chips Container */}
+            <div className="chips-wrapper" ref={chipsContainerRef}>
+              <div 
+                className="chips-scroll-container"
+                ref={chipsScrollRef}
+                onMouseDown={handleChipsMouseDown}
+                onMouseMove={handleChipsMouseMove}
+                onMouseUp={handleChipsMouseUp}
+                onMouseLeave={handleChipsMouseUp}
+                onTouchStart={handleChipsTouchStart}
+                onTouchMove={handleChipsTouchMove}
+                onTouchEnd={handleChipsTouchEnd}
+              >
+                {chips.map((chip, index) => (
+                  <button 
+                    key={index}
+                    className="suggestion-chip"
+                    onClick={() => handleChipClick(chip)}
+                    title={chip.label}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <form onSubmit={handleSendMessage} className="input-form">
               <input
