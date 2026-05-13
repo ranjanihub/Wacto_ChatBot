@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Minus, Send, Bot, User, Check, CheckCheck, ChevronDown } from 'lucide-react';
+import { Minus, Send, Bot, User, Check, CheckCheck, ChevronDown, ArrowDown } from 'lucide-react';
 import './Chatbot.css';
 
 export default function Chatbot() {
@@ -10,6 +10,7 @@ export default function Chatbot() {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true); // Track scroll position
+  const [autoScroll, setAutoScroll] = useState(true); // Auto-scroll toggle state
   const [chips, setChips] = useState([
     { label: "About Wacto", action: "message", value: "Tell me about Wacto" },
     { label: "Services", action: "message", value: "What services does Wacto offer" },
@@ -28,6 +29,14 @@ export default function Chatbot() {
     setIsAtBottom(true);
   };
 
+  const toggleAutoScroll = () => {
+    setAutoScroll(!autoScroll);
+    // Auto-scroll to bottom when toggled on
+    if (!autoScroll) {
+      setTimeout(() => scrollToBottom(), 100);
+    }
+  };
+
   // Check if user is at bottom of chat
   const handleChatScroll = () => {
     if (!chatMessagesRef.current) return;
@@ -38,8 +47,10 @@ export default function Chatbot() {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
+    if (autoScroll) {
+      scrollToBottom();
+    }
+  }, [messages, isTyping, autoScroll]);
 
   const toggleChat = () => setIsOpen(!isOpen);
 
@@ -205,6 +216,14 @@ export default function Chatbot() {
               </div>
             </div>
             <div className="header-actions">
+              <button 
+                className={`auto-scroll-btn ${autoScroll ? 'active' : ''}`}
+                onClick={toggleAutoScroll}
+                title={autoScroll ? 'Disable auto-scroll' : 'Enable auto-scroll'}
+                aria-label="Toggle auto-scroll"
+              >
+                <ArrowDown size={16} strokeWidth={2.5} />
+              </button>
               <button className="close-btn" onClick={toggleChat}>
                 <Minus size={16} strokeWidth={3} />
               </button>
