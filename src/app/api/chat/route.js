@@ -15,58 +15,113 @@ import { NextResponse } from 'next/server';
  * 4. Respond to Webhook node to send response back
  */
 
-// Intent detection function
+// Intent detection function - Wacto business-focused
 function detectIntent(message) {
   const lowerMessage = message.toLowerCase();
   
-  // Pricing-related keywords
-  if (/\bpricing|cost|price|plans|tariff|investment|subscription|pay|payment\b/i.test(lowerMessage)) {
+  // Pricing-related intent
+  if (/\bpric|cost|price|plans|tariff|investment|subscription|pay|payment|budget|rate|charge\b/i.test(lowerMessage)) {
     return 'pricing';
   }
   
-  // Services-related keywords
-  if (/\bservice|feature|chatbot|automation|integration|whatsapp|api|bot|solution\b/i.test(lowerMessage)) {
-    return 'services';
+  // Chatbot/AI services intent
+  if (/\bchatbot|ai|artificial intelligence|automation|nlp|conversation|intelligent|smart bot\b/i.test(lowerMessage)) {
+    return 'chatbot';
   }
   
-  // Support/Contact-related keywords
-  if (/\bsupport|contact|help|reach|call|meeting|demo|enquiry|question|issue\b/i.test(lowerMessage)) {
-    return 'support';
+  // WhatsApp API intent
+  if (/\bwhatsapp|whatsapp api|messaging|sms|communication|bulk message|broadcast\b/i.test(lowerMessage)) {
+    return 'whatsapp_api';
   }
   
-  return 'general';
+  // SEO/Marketing intent
+  if (/\bseo|search engine|ranking|digital marketing|content|marketing|growth|optimization\b/i.test(lowerMessage)) {
+    return 'seo';
+  }
+  
+  // Website development intent
+  if (/\bwebsite|web development|web design|ecommerce|online store|web app|platform\b/i.test(lowerMessage)) {
+    return 'website';
+  }
+  
+  // Demo/trial intent
+  if (/\bdemo|trial|test|try|poc|proof of concept|evaluation\b/i.test(lowerMessage)) {
+    return 'demo';
+  }
+  
+  // Contact/Sales intent
+  if (/\bcontact|sales|partnership|collaboration|inquiry|enquiry|quote|proposal|enterprise\b/i.test(lowerMessage)) {
+    return 'sales';
+  }
+  
+  // Default to general business intent (always Wacto-focused)
+  return 'wacto_general';
 }
 
-// Function to generate chips based on intent
-function generateChips(intent, botReply = '') {
+// Function to generate chips based on intent - Maximum 4 chips per intent
+function generateChips(intent) {
   const chipTemplates = {
     pricing: [
-      { label: "View Pricing", action: "url", value: "https://wacto.in/best-whatsapp-business-api-pricing-india/" },
-      { label: "Compare Plans", action: "message", value: "Show pricing comparison" },
-      { label: "Talk to Sales", action: "message", value: "Connect me with sales" },
-      { label: "Enterprise Plan", action: "message", value: "Tell me about enterprise pricing" }
+      { label: "View Pricing Details", action: "message", value: "Show me detailed pricing information" },
+      { label: "Enquire Now", action: "message", value: "I want to enquire about pricing" },
+      { label: "Custom Quote", action: "message", value: "Get me a custom quote" },
+      { label: "Compare Plans", action: "message", value: "Compare different plans" }
     ],
-    services: [
-      { label: "AI Chatbot Features", action: "message", value: "What are the chatbot features?" },
-      { label: "Book Demo", action: "message", value: "I'd like to book a demo" },
-      { label: "Automation Services", action: "message", value: "Tell me about automation services" },
-      { label: "Website Integration", action: "message", value: "How to integrate with my website?" }
+    chatbot: [
+      { label: "AI Features", action: "message", value: "Tell me about AI chatbot features" },
+      { label: "How It Works", action: "message", value: "How does the chatbot work" },
+      { label: "Book Demo", action: "message", value: "Book a demo" },
+      { label: "See Examples", action: "message", value: "Show me examples" }
     ],
-    support: [
-      { label: "Contact Team", action: "message", value: "I need to contact the support team" },
-      { label: "Raise Enquiry", action: "message", value: "I want to raise an enquiry" },
-      { label: "Schedule Call", action: "message", value: "Schedule a call with the team" },
-      { label: "FAQs", action: "url", value: "https://wacto.in/faqs" }
+    whatsapp_api: [
+      { label: "API Details", action: "message", value: "Tell me about WhatsApp API" },
+      { label: "Integration Steps", action: "message", value: "How to integrate WhatsApp API" },
+      { label: "Pricing", action: "message", value: "WhatsApp API pricing" },
+      { label: "Get Started", action: "message", value: "Get started with WhatsApp API" }
     ],
-    general: [
-      { label: "Learn More", action: "message", value: "Tell me more about this" },
-      { label: "How does it work?", action: "message", value: "How does this work?" },
-      { label: "Get Started", action: "message", value: "How can I get started?" },
-      { label: "Contact Support", action: "message", value: "Contact support" }
+    seo: [
+      { label: "SEO Services", action: "message", value: "Tell me about SEO services" },
+      { label: "Portfolio", action: "message", value: "Show SEO portfolio" },
+      { label: "Get SEO Audit", action: "message", value: "Get a free SEO audit" },
+      { label: "Enquire", action: "message", value: "Enquire about SEO services" }
+    ],
+    website: [
+      { label: "Web Development", action: "message", value: "Tell me about web development" },
+      { label: "Portfolio", action: "message", value: "Show web development portfolio" },
+      { label: "Request Quote", action: "message", value: "Request a quote" },
+      { label: "Discuss Project", action: "message", value: "Discuss my project" }
+    ],
+    demo: [
+      { label: "Schedule Demo", action: "message", value: "Schedule a demo call" },
+      { label: "Live Demo", action: "message", value: "Show me a live demo" },
+      { label: "Demo Video", action: "message", value: "Watch demo video" },
+      { label: "When Available", action: "message", value: "When is the next demo" }
+    ],
+    sales: [
+      { label: "Talk to Sales", action: "message", value: "Connect me with sales team" },
+      { label: "Schedule Call", action: "message", value: "Schedule a call" },
+      { label: "Proposal", action: "message", value: "Send me a proposal" },
+      { label: "Enterprise Plan", action: "message", value: "Tell me about enterprise plan" }
+    ],
+    wacto_general: [
+      { label: "About Wacto", action: "message", value: "Tell me about Wacto" },
+      { label: "Services", action: "message", value: "What services does Wacto offer" },
+      { label: "Book Demo", action: "message", value: "Book a demo" },
+      { label: "Contact", action: "message", value: "Contact Wacto team" }
     ]
   };
   
-  return chipTemplates[intent] || chipTemplates.general;
+  return chipTemplates[intent] || chipTemplates.wacto_general;
+}
+
+// Function to generate default fallback chips - always Wacto business-focused
+// NOTE: All chips use message action - no direct URLs to maintain control via n8n
+function getDefaultChips() {
+  return [
+    { label: "About Wacto", action: "message", value: "Tell me about Wacto" },
+    { label: "Services", action: "message", value: "What services does Wacto offer" },
+    { label: "Book Demo", action: "message", value: "Book a demo" }
+  ];
 }
 
 export async function POST(req) {
@@ -159,7 +214,7 @@ export async function POST(req) {
         error: 'Failed to connect to n8n',
         reply: '❌ Cannot connect to processing system. Check if n8n is running and webhook is active.',
         source: 'error',
-        chips: generateChips('support')
+        chips: generateChips(userIntent)
       }, { status: 503 });
     }
 
@@ -174,7 +229,7 @@ export async function POST(req) {
           error: 'Webhook method mismatch',
           reply: '⚠️ N8N webhook is not accepting POST requests. Check webhook HTTP method is set to POST in n8n.',
           source: 'error',
-          chips: generateChips('support')
+          chips: generateChips(userIntent)
         }, { status: 503 });
       }
       
@@ -182,7 +237,7 @@ export async function POST(req) {
         error: 'Webhook not registered',
         reply: '⚠️ The AI workflow is not active or webhook not registered. Please activate the n8n workflow (toggle at top-right).',
         source: 'error',
-        chips: generateChips('support')
+        chips: generateChips(userIntent)
       }, { status: 503 });
     }
 
@@ -201,7 +256,7 @@ export async function POST(req) {
         error: `n8n error (${n8nResponse.status})`,
         reply: `⚠️ AI processing error. Status: ${n8nResponse.status}. The workflow may be misconfigured or Ollama is not responding.`,
         source: 'error',
-        chips: generateChips('support'),
+        chips: generateChips(userIntent),
         debug: process.env.NODE_ENV === 'development' ? { status: n8nResponse.status, preview: responseBody.substring(0, 200) } : undefined
       }, { status: n8nResponse.status });
     }
@@ -248,7 +303,7 @@ export async function POST(req) {
     console.log('✅ Bot Reply:', botReply.substring(0, 150));
     
     // Generate chips based on detected intent or use chips from n8n response
-    const chips = responseData.chips || generateChips(userIntent, botReply);
+    const chips = responseData.chips || generateChips(userIntent);
     
     console.log('💡 Generated chips:', JSON.stringify(chips, null, 2));
     console.log('📨 === CHAT RESPONSE COMPLETE ===\n');
@@ -268,9 +323,9 @@ export async function POST(req) {
     
     return NextResponse.json({
       error: 'Unexpected error',
-      reply: '❌ An unexpected error occurred. Please try again or contact support.',
+      reply: '❌ An unexpected error occurred. Please try again or contact our team.',
       source: 'error',
-      chips: generateChips('support'),
+      chips: generateChips(userIntent),
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }

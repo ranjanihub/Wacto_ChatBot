@@ -11,10 +11,10 @@ export default function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true); // Track scroll position
   const [chips, setChips] = useState([
-    { label: "What is WhatsApp API?", action: "message", value: "What is WhatsApp API?" },
-    { label: "How does it work?", action: "message", value: "How does it work?" },
-    { label: "Pricing plans", action: "message", value: "Tell me about pricing plans" },
-    { label: "Get started", action: "message", value: "How can I get started?" }
+    { label: "About Wacto", action: "message", value: "Tell me about Wacto" },
+    { label: "Services", action: "message", value: "What services does Wacto offer" },
+    { label: "Book Demo", action: "message", value: "Book a demo" },
+    { label: "Contact", action: "message", value: "Contact Wacto team" }
   ]);
   const messagesEndRef = useRef(null);
   const chatMessagesRef = useRef(null); // Ref for messages container
@@ -43,16 +43,10 @@ export default function Chatbot() {
 
   const toggleChat = () => setIsOpen(!isOpen);
 
-  // Handle chip click/action
+  // Handle chip click/action - always send message directly
   const handleChipClick = (chip) => {
-    if (chip.action === 'url') {
-      window.open(chip.value, '_blank');
-    } else if (chip.action === 'message') {
-      setInputMessage(chip.value);
-    } else if (chip.action === 'send') {
-      // Send the message directly
-      sendMessage(chip.value);
-    }
+    // Send the message directly without placing in input box
+    sendMessage(chip.value);
   };
 
   // Send message (extracted for reuse)
