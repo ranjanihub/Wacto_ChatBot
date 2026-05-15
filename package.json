@@ -17,12 +17,14 @@
     "@langchain/openai": "^1.4.5",
     "cheerio": "^1.2.0",
     "chromadb": "^3.4.3",
+    "firecrawl": "^4.23.0",
     "franc-min": "^6.2.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.4",
     "openai": "^4.104.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "weaviate-client": "^3.13.0"
   },
   "devDependencies": {
     "eslint": "^9",

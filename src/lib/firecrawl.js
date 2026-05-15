@@ -1,0 +1,1 @@
+This script configures Firecrawl to crawl the company website, index its content, and save the data to a JSON file. Replace `startUrl` with your company's website URL.
