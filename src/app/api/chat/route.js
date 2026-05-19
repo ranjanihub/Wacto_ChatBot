@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getAnswer } from '@/lib/rag';
+import { searchTavily } from '@/lib/tavily';
 
 /**
  * SIMPLIFIED CHAT API - N8N + OLLAMA ONLY
@@ -355,4 +357,31 @@ export async function GET(req) {
       step4: 'Workflow must respond with { reply: "..." }'
     }
   });
+}
+
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    const { query } = req.body;
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    try {
+      let answer = await getAnswer(query);
+
+      if (!answer) {
+        const fallbackResults = await searchTavily(query);
+        answer = fallbackResults[0]?.snippet || 'No answer found.';
+      }
+
+      res.write(`data: ${JSON.stringify({ answer })}\n\n`);
+      res.end();
+    } catch (error) {
+      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.end();
+    }
+  } else {
+    res.status(405).json({ message: 'Method Not Allowed' });
+  }
 }
