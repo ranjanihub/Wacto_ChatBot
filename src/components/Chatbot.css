@@ -366,29 +366,29 @@
   align-items: center;
   justify-content: center;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
-  border: none;
+  background: #f3f4f6; /* light gray */
+  color: #0f172a; /* near-black text */
+  border: 1px solid #e6e9ee;
   border-radius: 24px;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
   user-select: none;
   -webkit-user-select: none;
 }
 
 .suggestion-chip:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  background: #e5e7eb; /* slightly darker gray on hover */
 }
 
 .suggestion-chip:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
 }
 
 /* Responsive Chip Styles for Different Screen Sizes */
