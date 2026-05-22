@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Minus, Send, Bot, User, Check, CheckCheck, ChevronDown, ArrowDown } from 'lucide-react';
+import { Minus, Send, Bot, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import './Chatbot.css';
 
 export default function Chatbot() {
@@ -12,10 +12,9 @@ export default function Chatbot() {
   const [isAtBottom, setIsAtBottom] = useState(true); // Track scroll position
   const [autoScroll, setAutoScroll] = useState(true); // Auto-scroll toggle state
   const [chips, setChips] = useState([
-    { label: "About Wacto", action: "message", value: "Tell me about Wacto" },
-    { label: "Services", action: "message", value: "What services does Wacto offer" },
-    { label: "Book Demo", action: "message", value: "Book a demo" },
-    { label: "Contact", action: "message", value: "Contact Wacto team" }
+    { label: "What is WhatsApp API?", action: "message", value: "What is WhatsApp API?" },
+    { label: "Pricing", action: "message", value: "Pricing" },
+    { label: "FAQs", action: "message", value: "FAQs" }
   ]);
   const messagesEndRef = useRef(null);
   const chatMessagesRef = useRef(null); // Ref for messages container
@@ -208,7 +207,7 @@ export default function Chatbot() {
           <div className="chat-header">
             <div className="header-info">
               <div className="bot-avatar-header">
-                <img src="/logo.jpg" alt="Wacto" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                <img src="/logo.jpg" alt="Wacto" style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }} />
               </div>
               <div>
                 <h3 className="bot-name">Wacto</h3>
@@ -216,15 +215,7 @@ export default function Chatbot() {
               </div>
             </div>
             <div className="header-actions">
-              <button 
-                className={`auto-scroll-btn ${autoScroll ? 'active' : ''}`}
-                onClick={toggleAutoScroll}
-                title={autoScroll ? 'Disable auto-scroll' : 'Enable auto-scroll'}
-                aria-label="Toggle auto-scroll"
-              >
-                <ArrowDown size={16} strokeWidth={2.5} />
-              </button>
-              <button className="close-btn" onClick={toggleChat}>
+              <button className="close-btn" onClick={toggleChat} aria-label="Close chat">
                 <Minus size={16} strokeWidth={3} />
               </button>
             </div>
@@ -262,11 +253,7 @@ export default function Chatbot() {
                       msg.content
                     )}
                     
-                    {msg.role === 'user' && (
-                      <div className="user-avatar-overlay">
-                        <User size={20} color="#e2e8f0" fill="currentColor" />
-                      </div>
-                    )}
+                    {/* user avatar removed from sent messages per design */}
                   </div>
                   
                   {msg.role === 'user' && (
@@ -351,6 +338,7 @@ export default function Chatbot() {
                 <Send size={20} />
               </button>
             </form>
+            <div className="powered-by">Powered by <strong>Wacto</strong></div>
           </div>
         </div>
       )}
