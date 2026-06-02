@@ -53,6 +53,29 @@ export default function Chatbot() {
 
   const toggleChat = () => setIsOpen(!isOpen);
 
+  // When the chat window is opened and there are no messages yet,
+  // insert the initial bot/system message and default chips.
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      const now = new Date();
+      const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      const initialBotMsg = {
+        id: Date.now(),
+        role: 'bot',
+        content: `Hello! Welcome to Wacto.<br/><br/>Would you like to book a demo, learn about Wacto, or ask something else?<br/><br/>Type your message below and I'll help you. 😊`,
+        timestamp: timeString
+      };
+
+      setMessages([initialBotMsg]);
+      setChips([
+        { label: "Book a Demo", action: "message", value: "Book a Demo" },
+        { label: "Pricing", action: "message", value: "Pricing" },
+        { label: "About", action: "message", value: "About" }
+      ]);
+    }
+  }, [isOpen]);
+
   // Handle chip click/action - always send message directly
   const handleChipClick = (chip) => {
     // Send the message directly without placing in input box
