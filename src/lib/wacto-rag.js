@@ -108,23 +108,24 @@ class WactoRAGService {
 
   async scrapeWactoWebsite() {
     try {
-      console.log('🌐 Scraping wacto.in website (parallel)...');
+      console.log('🌐 Scraping wacto.in website fully (comprehensive)...');
 
       const content = [];
       
-      // Key pages to scrape
+      // Key pages to scrape - now includes Integration page
       const pagesToScrape = [
-        { url: 'https://wacto.in/', category: 'Homepage' },
-        { url: 'https://wacto.in/best-whatsapp-business-api-pricing-india/', category: 'Pricing' },
-        { url: 'https://wacto.in/contact-us/', category: 'Contact' },
-        { url: 'https://wacto.in/partnership/', category: 'Partnership' }
+        { url: 'https://wacto.in/', category: 'Homepage', priority: 1 },
+        { url: 'https://wacto.in/best-whatsapp-business-api-pricing-india/', category: 'Pricing', priority: 1 },
+        { url: 'https://wacto.in/best-whatsapp-business-integration-services-in-india/', category: 'Integration', priority: 1 },
+        { url: 'https://wacto.in/contact-us/', category: 'Contact', priority: 2 },
+        { url: 'https://wacto.in/partnership/', category: 'Partnership', priority: 2 }
       ];
 
-      // Parallel fetching for speed
+      // Enhanced parallel fetching for comprehensive data
       const fetchPage = async (page) => {
         try {
           const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 8000);
+          const timeout = setTimeout(() => controller.abort(), 12000); // Increased timeout for full page load
           
           const response = await fetch(page.url, { signal: controller.signal });
           clearTimeout(timeout);
@@ -135,38 +136,75 @@ class WactoRAGService {
           const $ = cheerioLoad(html);
 
           // Remove unnecessary elements
-          $('script, style, nav, footer, .cookie-banner, .sidebar').remove();
+          $('script, style, nav, footer, .cookie-banner, .sidebar, .modal').remove();
 
           const pageContent = [];
           
-          // Extract headings
-          $('h1, h2, h3').each((i, elem) => {
+          // Extract main content area
+          const mainContent = $('main, article, .content, [role="main"]').first();
+          const targetElement = mainContent.length > 0 ? mainContent : $.root();
+          
+          // Extract headings with hierarchy
+          targetElement.find('h1, h2, h3, h4').each((i, elem) => {
             const text = $(elem).text().trim();
-            if (text.length > 5) pageContent.push(text);
+            const tag = elem.name;
+            if (text.length > 3) pageContent.push(`${tag.toUpperCase()}: ${text}`);
           });
 
-          // Extract paragraphs
-          $('p').each((i, elem) => {
+          // Extract paragraphs and descriptions
+          targetElement.find('p, .description, .intro, [class*="desc"]').each((i, elem) => {
             const text = $(elem).text().trim();
-            if (text.length > 20 && text.length < 1500) pageContent.push(text);
+            if (text.length > 15 && text.length < 2000) pageContent.push(text);
           });
 
-          // Extract lists
-          $('li').each((i, elem) => {
+          // Extract lists (with context)
+          targetElement.find('ul, ol').each((i, list) => {
+            const heading = $(list).prev('h2, h3, h4, p').text().trim();
+            if (heading) pageContent.push(`List: ${heading}`);
+            
+            $(list).find('li').each((j, elem) => {
+              const text = $(elem).text().trim();
+              if (text.length > 5) pageContent.push(`  • ${text}`);
+            });
+          });
+
+          // Extract feature/benefit boxes
+          targetElement.find('.feature, .benefit, .box, [class*="card"], [class*="item"]').each((i, elem) => {
+            const title = $(elem).find('h3, h4, .title').text().trim();
+            const desc = $(elem).find('p, .description').text().trim();
+            if (title || desc) {
+              if (title) pageContent.push(`Feature: ${title}`);
+              if (desc) pageContent.push(`  ${desc}`);
+            }
+          });
+
+          // Extract tables
+          targetElement.find('table').each((i, table) => {
+            $(table).find('tr').each((j, row) => {
+              const cells = $(row).find('td, th').map((k, cell) => $(cell).text().trim()).get();
+              if (cells.length > 0) pageContent.push(`  ${cells.join(' | ')}`);
+            });
+          });
+
+          // Extract pricing info if available
+          targetElement.find('[class*="price"], [class*="plan"], .pricing').each((i, elem) => {
             const text = $(elem).text().trim();
-            if (text.length > 5) pageContent.push(`• ${text}`);
+            if (text.length > 10) pageContent.push(`Pricing: ${text}`);
           });
 
           if (pageContent.length > 0) {
+            const fullContent = pageContent.join('\\n');
             return {
-              text: pageContent.join('\\n').slice(0, 3000),
+              text: fullContent.slice(0, 5000), // Increased to 5000 chars for comprehensive content
               source: `wacto.in-${page.category.toLowerCase()}`,
-              url: page.url
+              url: page.url,
+              priority: page.priority,
+              size: fullContent.length
             };
           }
           return null;
         } catch (error) {
-          console.warn(`⚠️  ${page.category} fetch error`);
+          console.warn(`⚠️  ${page.category} fetch error: ${error.message}`);
           return null;
         }
       };
@@ -280,10 +318,27 @@ class WactoRAGService {
       
       // Scrape live website
       const scrapedDocuments = await this.scrapeWactoWebsite();
+      const fallbackDocs = this.getFallbackDocuments();
       
-      const documentsToStore = scrapedDocuments.length > 0 
-        ? scrapedDocuments 
-        : this.getFallbackDocuments();
+      // Combine scraped docs with critical fallback documents
+      let documentsToStore = [];
+      if (scrapedDocuments.length > 0) {
+        // Use scraped docs but ensure we have structured contact info
+        documentsToStore = scrapedDocuments;
+        // Add structured contact info from fallback if not in scraped docs
+        const hasContactInfo = scrapedDocuments.some(doc => 
+          doc.text.includes('+91-8012666888') || doc.text.includes('wecare@wacto.in')
+        );
+        if (!hasContactInfo) {
+          // Add the fallback contact document
+          const contactDoc = fallbackDocs.find(doc => doc.source === 'fallback-contact');
+          if (contactDoc) {
+            documentsToStore.push(contactDoc);
+          }
+        }
+      } else {
+        documentsToStore = fallbackDocs;
+      }
       
       console.log(`📝 Storing ${documentsToStore.length} documents in ChromaDB...`);
       
@@ -355,7 +410,7 @@ class WactoRAGService {
         url: 'https://wacto.in/best-whatsapp-business-api-pricing-india/'
       },
       {
-        text: "Contact Wacto\nAddress: 85, Padmini, Gandhinagar, 1st main road, Adyar, Chennai (Above Bata Showroom)\nPhone: +91-8012666888\nEmail: wecare@wacto.in\nWebsite: https://wacto.in\nContact Form: https://wacto.in/contact-us/",
+        text: "Contact Wacto\nPhone: +91-8012666888\nEmail: wecare@wacto.in\nAddress: 85, Padmini, Gandhinagar, 1st main road, Adyar, Chennai\nWebsite: https://wacto.in\nContact Form: https://wacto.in/contact-us/",
         source: 'fallback-contact',
         url: 'https://wacto.in/contact-us/'
       },
@@ -402,9 +457,13 @@ class WactoRAGService {
       console.log('🔍 Using keyword-based retrieval...');
       const lowerQuestion = question.toLowerCase();
       const words = lowerQuestion.split(/\s+/);
+      
+      // Check if this is a contact-related query
+      const isContactQuery = /contact|phone|email|address|location|reach/i.test(question);
 
       const scored = this.inMemoryDocuments.map(doc => {
         const docText = doc.text.toLowerCase();
+        const docSource = (doc.source || '').toLowerCase();
         let score = 0;
         
         words.forEach(word => {
@@ -413,6 +472,25 @@ class WactoRAGService {
             score += occurrences;
           }
         });
+        
+        // Boost score for contact-related keywords in document
+        const contactKeywords = ['phone', 'email', 'address', 'contact', '+91', 'wecare', 'adyar', 'gandhinagar'];
+        let hasContactKeywords = 0;
+        contactKeywords.forEach(keyword => {
+          if (docText.includes(keyword)) {
+            hasContactKeywords++;
+          }
+        });
+        
+        // Boost score for documents matching the query type
+        if (isContactQuery) {
+          // ONLY give boost to actually contact-related documents
+          if (docSource.includes('contact')) {
+            score += 50; // Strong boost for contact documents
+          } else if (docSource.includes('fallback-contact')) {
+            score += 50; // Strong boost for structured contact data
+          }
+        }
 
         return { ...doc, score };
       });
@@ -434,39 +512,68 @@ class WactoRAGService {
         await this.initializeDocuments();
       }
 
-      // Retrieve relevant documents (now async)
-      const relevantDocs = await this.retrieveRelevantDocuments(question, 2);
-      console.log(`📖 Retrieved ${relevantDocs.length} relevant documents from ChromaDB/fallback`);
+      // Detect if query is about contact information
+      const isContactQuery = /contact|phone|email|address|location|reach|call|number|mobile|telephone|how.{0,10}reach/i.test(question);
+      
+      // Retrieve relevant documents - more for contact queries
+      const topK = isContactQuery ? 3 : 1;
+      const contextLength = isContactQuery ? 500 : 300;
+      
+      let relevantDocs = await this.retrieveRelevantDocuments(question, topK);
+      console.log(`📖 Retrieved ${relevantDocs.length} relevant documents`);
 
-      // Build context from retrieved documents
-      const context = relevantDocs.length > 0 
-        ? relevantDocs.map(doc => doc.text).slice(0, 500).join('\n')
-        : '';
+      // If this is a contact query, ensure structured contact doc(s) are injected at front
+      if (isContactQuery) {
+        // Try to get fallback contact from fallback docs
+        const fallbackContact = (this.getFallbackDocuments() || []).find(d => (d.source || '').toLowerCase() === 'fallback-contact');
 
-      // Optimized system prompt for speed and Wacto AI Assistant branding
-      const systemPrompt = `You are Wacto AI Assistant - customer support for Wacto WhatsApp Business API.
-Based on live data from https://wacto.in/
+        const existingSources = new Set(relevantDocs.map(r => r.source));
 
-COMPANY FACTS:
-- Founders: Sekher Durgalakshmi (Durga) and Gunasekaran Rajendran
-- Location: Chennai, India
-- Services: WhatsApp Business API, Chatbots, CRM Integration, Analytics
+        // If in-memory docs exist (Chroma may be in use but keep fallback available)
+        if (this.inMemoryDocuments) {
+          const contactDocs = this.inMemoryDocuments.filter(d => {
+            const s = (d.source || '').toLowerCase();
+            return s.includes('contact') || s.includes('fallback-contact');
+          }).map(d => ({ text: d.text, source: d.source }));
 
-RULES: Be direct, concise, no markdown. No promotional content. Short replies (1-3 sentences).
-Greeting: "Hello! I'm Wacto AI. How can I help?"
+          const toPrepend = contactDocs.filter(cd => !existingSources.has(cd.source));
+          if (toPrepend.length > 0) {
+            relevantDocs = [...toPrepend, ...relevantDocs];
+            console.log(`🔗 Injected ${toPrepend.length} contact doc(s) into context (in-memory)`);
+          }
+        }
 
-KNOWLEDGE: ${context ? context : 'Wacto provides WhatsApp Business API solutions.'}`;
+        // Always ensure fallbackContact is present if available
+        if (fallbackContact && !existingSources.has(fallbackContact.source)) {
+          relevantDocs = [{ text: fallbackContact.text, source: fallbackContact.source }, ...relevantDocs];
+          console.log('🔗 Injected fallback-contact into context');
+        }
+      }
+
+      // Build context from retrieved documents (concatenate first doc(s))
+      const context = (() => {
+        if (!relevantDocs || relevantDocs.length === 0) return '';
+        // For contact queries, merge up to first 2 docs to ensure full contact fields
+        if (isContactQuery) {
+          return relevantDocs.slice(0, 2).map(d => d.text).join('\n').slice(0, contextLength);
+        }
+        return relevantDocs[0].text.slice(0, contextLength);
+      })();
+
+      // Optimized system prompt - minimal, fast
+      // For contact queries, require exact contact fields from the context and no hallucination.
+      const systemPrompt = isContactQuery ? `You are Wacto AI Assistant.\nDirect, short replies (1-2 sentences). No markdown.\nIMPORTANT: If the context contains contact information (phone, email, address), respond EXACTLY with those fields and do not invent or change them. Format response as: Phone: <number> | Email: <email> | Address: <address> when available.\nContext:\n${context}` : `You are Wacto AI Assistant.\nFounders: Sekher Durgalakshmi (Durga) and Gunasekaran Rajendran.\nDirect, short replies (1-2 sentences). No markdown.\n${context}`;
 
       // Build user prompt
       const userPrompt = question;
 
       console.log('🔄 Calling Groq LLM with RAG context...');
 
-      // Build message history for context-aware conversation
+      // Build message history - minimal for speed
       const messages = [
-        ...history.slice(-4).map(h => ({
+        ...history.slice(-2).map(h => ({
           role: h.role === 'user' ? 'user' : 'assistant',
-          content: h.content.slice(0, 200)
+          content: h.content.slice(0, 100)
         })),
         { role: 'user', content: userPrompt }
       ];
@@ -483,9 +590,10 @@ KNOWLEDGE: ${context ? context : 'Wacto provides WhatsApp Business API solutions
             { role: 'system', content: systemPrompt },
             ...messages
           ],
-          temperature: 0.3,
-          max_tokens: 200,
-          top_p: 0.5
+          temperature: 0.2,
+          max_tokens: 150,
+          top_p: 0.3,
+          frequency_penalty: 1.0
         })
       });
 
@@ -516,7 +624,7 @@ KNOWLEDGE: ${context ? context : 'Wacto provides WhatsApp Business API solutions
     const lowerQuestion = question.toLowerCase();
     
     const fallbackResponses = {
-      'contact': "You can reach Wacto at: 📧 wecare@wacto.in | 📱 +91-8012666888 | 🌐 https://wacto.in",
+      'contact': "📞 Phone: +91-8012666888 | 📧 Email: wecare@wacto.in | 📍 Address: 85, Padmini, Gandhinagar, 1st main road, Adyar, Chennai",
       'price': "Wacto offers flexible pricing plans for all business sizes. Contact our sales team for a custom quote.",
       'feature': "Key features: WhatsApp API integration, automated messaging, AI chatbots, bulk messaging, CRM integration, and analytics.",
       'api': "Our WhatsApp Business API provides reliable messaging with automation, analytics, and seamless integrations.",

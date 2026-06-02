@@ -1,0 +1,80 @@
+{
+  "total": 12,
+  "passed": 11,
+  "accuracy": "91.7%",
+  "avgTime": "0.307s",
+  "details": [
+    {
+      "query": "Who founded Wacto?",
+      "reply": "Wacto was founded by Sekher Durgalakshmi (Durga) and Gunasekaran Rajendran.",
+      "pass": true,
+      "duration": 1.048
+    },
+    {
+      "query": "Who are the founders of Wacto?",
+      "reply": "The founders of Wacto are Sekher Durgalakshmi, also known as Durga, and Gunasekaran Rajendran.",
+      "pass": true,
+      "duration": 0.255
+    },
+    {
+      "query": "What are the pricing plans?",
+      "reply": "Wacto offers various pricing plans, including a free plan, a starter plan, a growth plan, and an enterprise plan, each with different features and pricing.",
+      "pass": true,
+      "duration": 0.251
+    },
+    {
+      "query": "Explain the pricing structure",
+      "reply": "Wacto offers a tiered pricing structure based on the number of messages sent per month, with four plans:   1. Starter: 10,000 messages, $9.99 per month 2. Business: 50,000 messages, $49.99 per month 3. Pro: 200,000 messages, $199.99 per month 4. Enterprise: Custom pricing for large businesses with high message volumes.",
+      "pass": true,
+      "duration": 0.243
+    },
+    {
+      "query": "How can I integrate Wacto with my business?",
+      "reply": "To integrate Wacto with your business, you can follow the self-onboarding process, which includes registering on the Wacto platform, verifying your business, and setting up your WhatsApp Business API account.",
+      "pass": true,
+      "duration": 0.183
+    },
+    {
+      "query": "Tell me about integration services",
+      "reply": "Wacto offers seamless integration services with various platforms, including CRM, ERP, and messaging systems, to help businesses streamline their operations and enhance customer engagement on WhatsApp.",
+      "pass": true,
+      "duration": 0.148
+    },
+    {
+      "query": "What features does Wacto offer?",
+      "reply": "Wacto offers features such as WhatsApp Business API, self-onboarding process, and scalable pricing plans to help businesses grow and simplify their WhatsApp journey.",
+      "pass": true,
+      "duration": 0.133
+    },
+    {
+      "query": "How do I contact Wacto?",
+      "reply": "Phone: +91-8012666888 | Email: wecare@wacto.in | Address: 85, Padmini, Gandhinagar, 1st main road, Adyar, Chennai",
+      "pass": true,
+      "duration": 0.488
+    },
+    {
+      "query": "What is the phone number?",
+      "reply": "Phone: +91-8012666888",
+      "pass": true,
+      "duration": 0.118
+    },
+    {
+      "query": "What is the email address?",
+      "reply": "wecare@wacto.in",
+      "pass": true,
+      "duration": 0.114
+    },
+    {
+      "query": "Where is Wacto located?",
+      "reply": "I couldn't find any information about Wacto's location.",
+      "pass": false,
+      "duration": 0.137
+    },
+    {
+      "query": "What is Wacto WhatsApp API?",
+      "reply": "Wacto is a WhatsApp Business API platform that enables businesses to integrate WhatsApp into their operations, providing features like messaging, customer support, and automation.",
+      "pass": true,
+      "duration": 0.571
+    }
+  ]
+}
