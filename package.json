@@ -29,5 +29,9 @@
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "16.2.4"
-  }
+  },
+  "description": "A Next.js chatbot application with RAG (Retrieval-Augmented Generation) capabilities for answering questions about Wacto.in using live website data.",
+  "main": "eval_rag.js",
+  "author": "",
+  "license": "ISC"
 }
