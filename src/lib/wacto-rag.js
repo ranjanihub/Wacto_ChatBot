@@ -578,14 +578,12 @@ RESPONSE RULES:
 - Embbed Youtube links in the response if the question is about demo videos.
 - Embbed contact links if the question is about contact details.
 - Use Embbed links for every url in the context.
-- Don't return urls as plain text, always embbed them with title like this: [Wacto Contact Page](https://wacto.in/contact-us/#enquiry-now).
 
-FORMATTING MUST BE:
+FORMATTING:
 - Use <br> for line breaks.
 - Use <strong> for headings.
 - Use bullet style: •
 - Use <a> tags for links.
-- Use [text](url) format for embedding links.
 
 SERVICES QUERIES:
 Return ONLY these core services:
