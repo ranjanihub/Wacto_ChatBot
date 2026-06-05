@@ -22,7 +22,7 @@
 
 .chat-window {
   width: 360px;
-  height: 720px;
+  height: 600px;
   max-height: calc(100vh - 48px);
   max-width: calc(100vw - 48px);
   border-radius: 16px;
