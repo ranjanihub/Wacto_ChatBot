@@ -117,7 +117,7 @@ class WactoRAGService {
         { url: 'https://wacto.in/', category: 'Homepage', priority: 1 },
         { url: 'https://wacto.in/best-whatsapp-business-api-pricing-india/', category: 'Pricing', priority: 1 },
         { url: 'https://wacto.in/best-whatsapp-business-integration-services-in-india/', category: 'Integration', priority: 1 },
-        { url: 'https://wacto.in/contact-us/', category: 'Contact', priority: 2 },
+        { url: 'https://wacto.in/contact-us/#enquiry-now.', category: 'Contact', priority: 2 },
         { url: 'https://wacto.in/partnership/', category: 'Partnership', priority: 2 }
       ];
 
@@ -514,7 +514,7 @@ class WactoRAGService {
 
       // Detect if query is about contact information
       const isContactQuery = /contact|phone|email|address|location|reach|call|number|mobile|telephone|how.{0,10}reach/i.test(question);
-      
+      const isPricingQuery = /price|pricing|cost|plan|plans|subscription|package/i.test(question);
       // Retrieve relevant documents - more for contact queries
       const topK = isContactQuery ? 3 : 1;
       const contextLength = isContactQuery ? 500 : 300;
@@ -562,8 +562,64 @@ class WactoRAGService {
 
       // Optimized system prompt - minimal, fast
       // For contact queries, require exact contact fields from the context and no hallucination.
-      const systemPrompt = isContactQuery ? `You are Wacto AI Assistant.\nDirect, short replies (1-2 sentences). No markdown.\nIMPORTANT: If the context contains contact information (phone, email, address), respond EXACTLY with those fields and do not invent or change them. Format response as: Phone: <number> | Email: <email> | Address: <address> when available.\nContext:\n${context}` : `You are Wacto AI Assistant.\nFounders: Sekher Durgalakshmi (Durga) and Gunasekaran Rajendran.\nDirect, short replies (1-2 sentences). No markdown.\n${context}`;
+      const systemPrompt = `
+You are Wacto AI Assistant.
 
+RESPONSE RULES:
+- Keep responses under 60 words.
+- Maximum 4 lines.
+- Use simple business language.
+- Never return large paragraphs.
+- Never explain everything at once.
+- Summarize first.
+- Let buttons/chips handle the next step.
+- for price queries, fetch details from pricing page and keep it concise.
+- Never use Markdown (**text**)
+- Embbed Youtube links in the response if the question is about demo videos.
+- Embbed contact links if the question is about contact details.
+- Use Embbed links for every url in the context.
+- Don't return urls as plain text, always embbed them with title like this: [Wacto Contact Page](https://wacto.in/contact-us/#enquiry-now).
+
+FORMATTING MUST BE:
+- Use <br> for line breaks.
+- Use <strong> for headings.
+- Use bullet style: •
+- Use <a> tags for links.
+- Use [text](url) format for embedding links.
+
+SERVICES QUERIES:
+Return ONLY these core services:
+
+<strong>Wacto Services</strong><br><br>
+
+• WhatsApp API Setup<br>
+• WhatsApp Bluetick Verification<br>
+• Click-to-Chat Ads<br>
+• WhatsApp QR Code Solutions<br>
+• Website Chat Widget<br>
+• WhatsApp Chatbot<br>
+• Lead Capture Forms<br><br>
+
+
+DEMO QUERIES:
+Return contact page link https://wacto.in/contact-us/#enquiry-now.
+
+BOOKING QUERIES:
+Return contact page link https://wacto.in/contact-us/#enquiry-now.
+
+DEMO VIDEOS QUERIES:
+Return demo videos page link https://www.youtube.com/@wacto_official.
+
+ABOUT QUERIES:
+Return Wacto is a WhatsApp API platform for business messaging. We provide reliable WhatsApp Business API integration for businesses to communicate with their customers effectively.
+
+FOUNDER QUERIES:
+Return Wacto founders: Sekher Durgalakshmi and Gunasekaran Rajendran.
+
+PRICING QUERIES:
+Engage Plus - ₹2,299 /Monthly ; Automate Pro - ₹4,299/Monthly; Ultimate Business - Custom Pricing. Then Return pricing page link https://wacto.in/best-whatsapp-business-api-pricing-india/.
+${context}
+`;
       // Build user prompt
       const userPrompt = question;
 
