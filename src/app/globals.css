@@ -19,7 +19,7 @@
 
 body {
   color: #1f2937;
-  background-color: #f8fafc;
+  background:transparent;
   font-family: var(--font-sans);
   min-height: 100vh;
 }
@@ -105,4 +105,16 @@ button {
 }
 button:active {
   transform: scale(0.95);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+}
+
+main,
+.main-content {
+  background: transparent !important;
 }
