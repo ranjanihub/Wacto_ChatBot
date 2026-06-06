@@ -577,7 +577,7 @@ RESPONSE RULES:
 - Never use Markdown (**text**)
 - Embbed Youtube links in the response if the question is about demo videos.
 - Embbed contact links if the question is about contact details.
-- Use anchor tags for every url in the context.
+- Use anchor tags for every url in the context that should open in new window.
 
 FORMATTING:
 - Use <br> for line breaks.
