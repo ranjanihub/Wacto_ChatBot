@@ -150,7 +150,51 @@ src/
 │   └── Chatbot.js        # Chat interface component
 └── lib/
     └── wacto-rag.js      # RAG service implementation
+    └── booking-service.js # Demo booking service
 ```
+
+## 📅 Demo Booking Feature
+
+The chatbot includes a complete demo booking system that allows users to schedule a meeting directly from the chat.
+
+### Features
+- **Conversational Booking Flow**: Multi-step form with conversational UX
+- **SMS OTP Verification**: Firebase-based phone verification
+- **Google Sheets Integration**: Automatic booking data storage
+- **Email Notifications**: Confirmation emails to user and admin
+- **Calendly Integration**: Seamless meeting scheduling
+- **Responsive Design**: Works on all devices
+
+### Booking Flow
+1. User types "Book a demo" or "Schedule a call"
+2. Bot triggers booking form with steps:
+   - Name input
+   - Email input
+   - Phone number input
+   - SMS OTP verification
+   - Confirmation & Calendly redirect
+3. Data stored in Google Sheet
+4. Emails sent to user and admin
+5. User redirected to Calendly for time selection
+
+### Setup
+For complete setup instructions, see [BOOKING_SETUP.md](./BOOKING_SETUP.md)
+
+Quick checklist:
+- [ ] Firebase project created with Phone Auth
+- [ ] Gmail SMTP configured with App Password
+- [ ] Google Sheets API key generated
+- [ ] Google Sheet shared with service account
+- [ ] `.env.local` file created with all credentials
+- [ ] Calendly link added to environment variables
+
+### Keywords that Trigger Booking
+- "Book a demo"
+- "Schedule a call"
+- "I want to schedule"
+- "Book an appointment"
+- "Schedule a meeting"
+- "Can I book a session?"
 
 ## N8N Workflow Setup
 

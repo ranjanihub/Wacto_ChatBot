@@ -43,6 +43,11 @@ function detectIntent(message) {
   if (/\bdemo|trial|test|try|poc|proof of concept|evaluation\b/i.test(lowerMessage)) {
     return 'demo';
   }
+
+  // Booking intent - new for demo scheduling
+  if (/\bbook|schedule|booking|appointment|call|meeting|session\b/i.test(lowerMessage)) {
+    return 'booking';
+  }
   
   // Contact/Sales intent
   if (/\bcontact|sales|partnership|collaboration|inquiry|enquiry|quote|proposal|enterprise\b/i.test(lowerMessage)) {
@@ -154,6 +159,9 @@ export async function POST(req) {
     // Generate chips based on detected intent
     const chips = generateChips(userIntent);
 
+    // Check if this should trigger booking flow
+    const shouldShowBookingFlow = (userIntent === 'demo' || userIntent === 'booking');
+
     console.log('✅ Bot Reply:', String(botReply).substring(0, 150));
     console.log('💡 Generated chips:', JSON.stringify(chips, null, 2));
     console.log('📨 === CHAT RESPONSE COMPLETE ===\n');
@@ -164,7 +172,8 @@ export async function POST(req) {
       source: 'groq-llm',
       detectedLanguage: 'en',
       detectedIntent: userIntent,
-      chips: chips
+      chips: chips,
+      bookingFlow: shouldShowBookingFlow
     });
 
   } catch (error) {

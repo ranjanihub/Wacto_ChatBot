@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Minus, Send, Bot, Check, CheckCheck, ChevronDown } from 'lucide-react';
+import BookingFlow from './BookingFlow';
 import './Chatbot.css';
 
 export default function Chatbot() {
@@ -11,6 +12,7 @@ export default function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true); // Track scroll position
   const [autoScroll, setAutoScroll] = useState(true); // Auto-scroll toggle state
+  const [isBookingFlow, setIsBookingFlow] = useState(false); // Track if in booking flow
   const [chips, setChips] = useState([
     { label: "What is WhatsApp API?", action: "message", value: "What is WhatsApp API?" },
     { label: "Pricing", action: "message", value: "Pricing" },
@@ -141,6 +143,11 @@ export default function Chatbot() {
       
       setMessages(prev => [...prev, botMsg]);
       
+      // Check if this should trigger booking flow
+      if (data.bookingFlow) {
+        setIsBookingFlow(true);
+      }
+      
       // Update chips based on the response
       if (data.chips && Array.isArray(data.chips) && data.chips.length > 0) {
         setChips(data.chips);
@@ -204,6 +211,51 @@ export default function Chatbot() {
     e.preventDefault();
     if (!inputMessage.trim()) return;
     await sendMessage(inputMessage);
+  };
+
+  const handleBookingComplete = (bookingData) => {
+    // Add a confirmation message to the chat
+    const now = new Date();
+    const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+    setMessages(prev => [...prev, {
+      id: Date.now(),
+      role: 'bot',
+      content: `Great! Your demo has been booked. 🎉<br/><br/>We've sent a confirmation <strong>Mail</strong> you can book your slot through Calendly <br/><br/>If you have any questions, feel free to ask!`,
+      timestamp: timeString
+    }]);
+
+    // Exit booking flow
+    setIsBookingFlow(false);
+
+    // Reset to default chips
+    setChips([
+      { label: "Book a Demo", action: "message", value: "Book a Demo" },
+      { label: "Pricing", action: "message", value: "Pricing" },
+      { label: "About", action: "message", value: "About" }
+    ]);
+  };
+
+  const handleBookingCancel = () => {
+    // Add a message and exit booking flow
+    const now = new Date();
+    const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+    setMessages(prev => [...prev, {
+      id: Date.now(),
+      role: 'bot',
+      content: `No problem! If you'd like to book a demo later, just let me know. 😊`,
+      timestamp: timeString
+    }]);
+
+    setIsBookingFlow(false);
+
+    // Reset to default chips
+    setChips([
+      { label: "Book a Demo", action: "message", value: "Book a Demo" },
+      { label: "Pricing", action: "message", value: "Pricing" },
+      { label: "About", action: "message", value: "About" }
+    ]);
   };
 
   return (
@@ -317,48 +369,57 @@ export default function Chatbot() {
 
           {/* Input Area */}
           <div className="chat-input-area">
-            {/* Horizontally Scrollable Chips Container */}
-            <div className="chips-wrapper" ref={chipsContainerRef}>
-              <div 
-                className="chips-scroll-container"
-                ref={chipsScrollRef}
-                onMouseDown={handleChipsMouseDown}
-                onMouseMove={handleChipsMouseMove}
-                onMouseUp={handleChipsMouseUp}
-                onMouseLeave={handleChipsMouseUp}
-                onTouchStart={handleChipsTouchStart}
-                onTouchMove={handleChipsTouchMove}
-                onTouchEnd={handleChipsTouchEnd}
-              >
-                {chips.map((chip, index) => (
-                  <button 
-                    key={index}
-                    className="suggestion-chip"
-                    onClick={() => handleChipClick(chip)}
-                    title={chip.label}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <form onSubmit={handleSendMessage} className="input-form">
-              <input
-                type="text"
-                className="chat-input"
-                placeholder="Type your message here..."
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+            {isBookingFlow ? (
+              <BookingFlow 
+                onComplete={handleBookingComplete}
+                onCancel={handleBookingCancel}
               />
-              <button 
-                type="submit" 
-                className={`send-btn ${inputMessage.trim() ? 'active' : ''}`}
-                disabled={!inputMessage.trim() || isTyping}
-              >
-                <Send size={20} />
-              </button>
-            </form>
-            <div className="powered-by">Powered by <strong>Wacto</strong></div>
+            ) : (
+              <>
+                {/* Horizontally Scrollable Chips Container */}
+                <div className="chips-wrapper" ref={chipsContainerRef}>
+                  <div 
+                    className="chips-scroll-container"
+                    ref={chipsScrollRef}
+                    onMouseDown={handleChipsMouseDown}
+                    onMouseMove={handleChipsMouseMove}
+                    onMouseUp={handleChipsMouseUp}
+                    onMouseLeave={handleChipsMouseUp}
+                    onTouchStart={handleChipsTouchStart}
+                    onTouchMove={handleChipsTouchMove}
+                    onTouchEnd={handleChipsTouchEnd}
+                  >
+                    {chips.map((chip, index) => (
+                      <button 
+                        key={index}
+                        className="suggestion-chip"
+                        onClick={() => handleChipClick(chip)}
+                        title={chip.label}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <form onSubmit={handleSendMessage} className="input-form">
+                  <input
+                    type="text"
+                    className="chat-input"
+                    placeholder="Type your message here..."
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                  />
+                  <button 
+                    type="submit" 
+                    className={`send-btn ${inputMessage.trim() ? 'active' : ''}`}
+                    disabled={!inputMessage.trim() || isTyping}
+                  >
+                    <Send size={20} />
+                  </button>
+                </form>
+                <div className="powered-by">Powered by <strong>Wacto</strong></div>
+              </>
+            )}
           </div>
         </div>
       )}
