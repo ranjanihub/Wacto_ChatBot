@@ -17,7 +17,7 @@
     "@langchain/openai": "^1.4.5",
     "cheerio": "^1.2.0",
     "chromadb": "^3.4.3",
-    "dotenv": "^17.4.2",
+    "dotenv": "^16.6.1",
     "firebase-admin": "^13.10.0",
     "firecrawl": "^4.23.0",
     "franc-min": "^6.2.0",
