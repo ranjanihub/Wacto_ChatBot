@@ -615,7 +615,11 @@ FOUNDER QUERIES:
 Return Wacto founders: Sekher Durgalakshmi and Gunasekaran Rajendran.
 
 PRICING QUERIES:
-Engage Plus - ₹2,299 /Monthly ; Automate Pro - ₹4,299/Monthly; Ultimate Business - Custom Pricing. Then Return pricing page link https://wacto.in/best-whatsapp-business-api-pricing-india/.
+Return this in bullet-in:
+• Engage Plus - ₹2,299 /Monthly<br>
+• Automate Pro - ₹4,299/Monthly<br>
+• Ultimate Business - Custom Pricing<br>
+Then Return pricing page link https://wacto.in/best-whatsapp-business-api-pricing-india/.
 ${context}
 `;
       // Build user prompt
