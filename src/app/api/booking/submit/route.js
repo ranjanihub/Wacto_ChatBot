@@ -32,16 +32,28 @@ export async function POST(req) {
       phoneNumber,
       sessionToken,
       otpCode,
-      scheduledTime,
+      bookingDate,
+      bookingTime,
     } = body;
 
     // Validate required fields
-    if (!name || !email || !phoneNumber || !sessionToken || !otpCode) {
-      return NextResponse.json(
-        { error: 'Name, email, phone number, session token, and OTP code are required' },
-        { status: 400 }
-      );
-    }
+    if (
+  !name ||
+  !email ||
+  !phoneNumber ||
+  !sessionToken ||
+  !otpCode ||
+  !bookingDate ||
+  !bookingTime
+) {
+  return NextResponse.json(
+    {
+      error:
+        'Name, email, phone, OTP, date and time are required'
+    },
+    { status: 400 }
+  );
+}
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,8 +72,9 @@ export async function POST(req) {
       phoneNumber,
       sessionToken,
       otpCode,
-      scheduledTime,
-      calendlyLink: process.env.CALENDLY_LINK,
+      bookingDate,
+      bookingTime,
+      calendarId: process.env.GOOGLE_CALENDAR_ID,
     });
 
     if (!result.success) {

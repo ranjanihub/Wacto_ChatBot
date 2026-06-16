@@ -63,12 +63,133 @@ console.log("PRIVATE KEY VARIABLE START:", privateKey?.substring(0, 40));
 const auth = new google.auth.JWT({
   email: process.env.GOOGLE_CLIENT_EMAIL,
   key: privateKey,
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  scopes: [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/meetings.space.created'
+  ],
+});
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET
+);
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
 });
 const sheets = google.sheets({
   version: 'v4',
   auth,
 });
+const calendar = google.calendar({
+  version: 'v3',
+  auth: oauth2Client,
+});
+// ============================================
+// Google Sheets Integration
+// ============================================
+function convertTo24Hour(time12h) {
+  if (!time12h.includes("AM") && !time12h.includes("PM")) {
+    return time12h;
+  }
+
+  const [time, modifier] = time12h.split(" ");
+
+  let [hours, minutes] = time.split(":");
+
+  if (hours === "12") {
+    hours = "00";
+  }
+
+  if (modifier === "PM") {
+    hours = String(parseInt(hours, 10) + 12);
+  }
+
+  return `${hours.padStart(2, "0")}:${minutes}`;
+}
+export async function createGoogleMeet(bookingData) {
+  try {
+
+    const time24 = convertTo24Hour(
+  bookingData.bookingTime
+);
+
+console.log("ORIGINAL TIME:", bookingData.bookingTime);
+console.log("24 HOUR TIME:", time24);
+
+const startTime = new Date(
+  `${bookingData.bookingDate}T${time24}:00`
+);
+
+    const endTime = new Date(
+      startTime.getTime() + 30 * 60 * 1000
+    );
+
+    const event = {
+  summary: `Wacto Demo - ${bookingData.name}`,
+  description: `
+Name: ${bookingData.name}
+Email: ${bookingData.email}
+Phone: ${bookingData.phoneNumber}
+  `,
+  start: {
+    dateTime: startTime.toISOString(),
+    timeZone: 'Asia/Kolkata',
+  },
+  end: {
+    dateTime: endTime.toISOString(),
+    timeZone: 'Asia/Kolkata',
+  },
+  conferenceData: {
+    createRequest: {
+      requestId: Date.now().toString()
+    },
+  },
+};
+const response = await calendar.events.insert({
+  calendarId: process.env.GOOGLE_CALENDAR_ID,
+  conferenceDataVersion: 1,
+  sendUpdates: "all",
+  requestBody: event,
+});
+console.log(
+  "FULL RESPONSE:",
+  JSON.stringify(response.data, null, 2)
+);
+    console.log("CREATE MEET INPUT:", bookingData);
+console.log("BOOKING DATE:", bookingData.bookingDate);
+console.log("BOOKING TIME:", bookingData.bookingTime);
+    
+console.log(
+  "CONFERENCE DATA:",
+  JSON.stringify(response.data.conferenceData, null, 2)
+);
+
+console.log("HANGOUT LINK:", response.data.hangoutLink);
+    console.log("CALENDAR RESPONSE:", response.data);
+console.log("HANGOUT LINK:", response.data.hangoutLink);
+
+const meetLink =
+  response.data.hangoutLink ||
+  response.data.conferenceData?.entryPoints?.find(
+    p => p.entryPointType === "video"
+  )?.uri;
+
+return {
+  success: true,
+  meetLink,
+  eventId: response.data.id,
+};
+  } catch (error) {
+    console.error("Google Calendar Error:", error);
+
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
 
 // ============================================
 // OTP Management
@@ -81,8 +202,9 @@ const sheets = google.sheets({
 export async function sendOTP(phoneNumber) {
   try {
     // Validate phone number format (E.164)
+    phoneNumber = '+' + phoneNumber.replace('+', '');
     if (!phoneNumber.match(/^\+[1-9]\d{1,14}$/)) {
-      throw new Error('Invalid phone number format. Use E.164 format (e.g., +1234567890)');
+      throw new Error('Invalid phone number');
     }
 
     // Generate OTP code
@@ -242,8 +364,7 @@ export async function storeBooking(bookingData) {
       name,
       email,
       phoneNumber,
-      calendlyLink,
-      scheduledTime,
+      meetLink
     } = bookingData;
 
     if (!name || !email || !phoneNumber) {
@@ -258,18 +379,18 @@ export async function storeBooking(bookingData) {
     // Prepare row data
     const now = new Date();
     const timestamp = now.toISOString();
-    const values = [
-      [
-        timestamp,
-        name,
-        email,
-        phoneNumber,
-        'Yes', // OTP Verified
-        calendlyLink || 'Pending', // Calendly link
-        scheduledTime || 'Pending', // Scheduled time
-        'Submitted', // Status
-      ],
-    ];
+    const values = [[
+      '', // A - S.No
+      new Date().toLocaleDateString('en-GB'), // B - Date
+      '', // C - Company Name
+      '', // D - Industry
+      bookingData.name, // E - Client Name
+      bookingData.phoneNumber, // F - Contact No
+      bookingData.email, // G - Email
+      'WACTO chatbot', // H - Source
+      '', '',
+      'WACTO' // K - Service
+    ]];
     console.log("CLIENT EMAIL:", process.env.GOOGLE_CLIENT_EMAIL);
 console.log("PRIVATE KEY EXISTS:", !!process.env.GOOGLE_PRIVATE_KEY);
 console.log(
@@ -295,7 +416,7 @@ console.log("TOKEN GENERATED:", !!token?.access_token);
     // Append to sheet
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: 'Sheet1!A:H', // Adjust range if your sheet structure differs
+      range: "'June 2026'!A:Z", // Adjust range if your sheet structure differs
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,
@@ -331,8 +452,8 @@ export async function sendConfirmationEmails(bookingData) {
       name,
       email,
       phoneNumber,
-      calendlyLink,
-      scheduledTime,
+      bookingDate,
+      bookingTime,
     } = bookingData;
 
     const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
@@ -355,11 +476,22 @@ export async function sendConfirmationEmails(bookingData) {
               <h3 style="margin-top: 0; color: #2c3e50;">Booking Details</h3>
               <p><strong>Phone:</strong> ${phoneNumber}</p>
               <p><strong>Email:</strong> ${email}</p>
-              ${scheduledTime ? `<p><strong>Scheduled Time:</strong> ${scheduledTime}</p>` : ''}
+              <p><strong>Demo Date:</strong> ${bookingDate}</p>
+              <p><strong>Demo Time:</strong> ${bookingTime}</p>
+              <button>
+                <a href="${bookingData.meetLink}" style="color: #fff; text-decoration: none;">
+                  Join Google Meet
+                </a>
+              </button>
             </div>
+           
             
-            ${calendlyLink ? `
-              <p><a href="${calendlyLink}" style="background-color: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Calendar</a></p>
+            ${bookingData.meetLink ? `
+            <p>
+            <a href="${bookingData.meetLink}">
+            Join Google Meet
+            </a>
+            </p>
             ` : ''}
             
             <p>Our team will reach out to you shortly with more details. If you have any questions in the meantime, feel free to contact us at <strong>wecare@wacto.in</strong> or call <strong>+91-8012666888</strong>.</p>
@@ -376,7 +508,7 @@ export async function sendConfirmationEmails(bookingData) {
       <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #2c3e50;">New Demo Booking Request 📅</h2>
+            <h2 style="color: #2c3e50;">New Demo Booking Request </h2>
             
             <p>A new user has booked a demo:</p>
             
@@ -385,13 +517,19 @@ export async function sendConfirmationEmails(bookingData) {
               <p><strong>Email:</strong> ${email}</p>
               <p><strong>Phone:</strong> ${phoneNumber}</p>
               <p><strong>Booked at:</strong> ${new Date().toLocaleString()}</p>
-              ${scheduledTime ? `<p><strong>Scheduled Time:</strong> ${scheduledTime}</p>` : ''}
+              <p><strong>Demo Date:</strong> ${bookingDate}</p>
+              <p><strong>Demo Time:</strong> ${bookingTime}</p>
+              <button>
+                <a href="${bookingData.meetLink}" style="color: #fff; text-decoration: none;">
+                  Join Google Meet  
+                </a>
+              </button>
             </div>
             
             <p>Booking details have been stored in the shared Google Sheet. Please follow up with the user.</p>
             
             <p>---<br/>
-            <strong>Wacto Booking System</strong></p>
+            <strong>Wacto Team</strong></p>
           </div>
         </body>
       </html>
@@ -459,8 +597,16 @@ export async function submitBooking(bookingData) {
     if (!otpVerification.success) {
       throw new Error(otpVerification.error);
     }
-
+    console.log("🚀 Creating Google Meet...");
     // Store in Google Sheets
+    const meetResult = await createGoogleMeet(bookingData);
+
+    if (!meetResult.success) {
+      throw new Error(meetResult.error);
+    }
+    console.log("MEET RESULT:", meetResult);
+    bookingData.meetLink = meetResult.meetLink;
+
     const sheetResult = await storeBooking(bookingData);
     if (!sheetResult.success) {
       throw new Error(`Failed to store booking: ${sheetResult.error}`);
@@ -473,7 +619,7 @@ export async function submitBooking(bookingData) {
     return {
       success: true,
       message: 'Booking submitted successfully',
-      calendlyLink: process.env.CALENDLY_LINK,
+      meetLink: bookingData.meetLink,
       spreadsheetUrl: sheetResult.spreadsheetUrl,
     };
   } catch (error) {

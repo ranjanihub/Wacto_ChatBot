@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Check, AlertCircle, Loader } from 'lucide-react';
 
 export default function BookingFlow({ onComplete, onCancel }) {
-  const [step, setStep] = useState('name'); // name, email, phone, otp, confirmation
+  const [step, setStep] = useState('name'); // name, email, phone, otp, date, time, confirmation
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -15,6 +15,9 @@ export default function BookingFlow({ onComplete, onCancel }) {
     phoneNumber: '',
     otpCode: '',
     sessionToken: '',
+    meetLink: '',
+    bookingDate: '',
+    bookingTime: '',
   });
 
   // Input handlers
@@ -62,9 +65,9 @@ export default function BookingFlow({ onComplete, onCancel }) {
     }
 
     // Validate phone format (E.164)
-    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    const phoneRegex = /^(\d{10}|\d{12})$/;
     if (!phoneRegex.test(formData.phoneNumber)) {
-      setError('Please use format: +1234567890 or +919876543210');
+      setError('Please use format: 1234567890 or 919876543210');
       return;
     }
 
@@ -146,7 +149,7 @@ try {
       }
 
       // Submit booking
-      await submitBooking();
+      setStep('date');
     } catch (err) {
       setError(err.message || 'Failed to verify OTP. Please try again.');
     } finally {
@@ -166,13 +169,18 @@ try {
           phoneNumber: formData.phoneNumber,
           sessionToken: formData.sessionToken,
           otpCode: formData.otpCode,
+          bookingDate: formData.bookingDate,
+          bookingTime: formData.bookingTime,
         }),
       });
 
       const text = await response.text();
       console.log("SUBMIT RESPONSE:", text);
       const data = text ? JSON.parse(text) : {};
-
+      setFormData(prev => ({
+            ...prev,
+            meetLink: data.meetLink || '',
+          }));
       if (!response.ok) {
         throw new Error(data.error || 'Failed to submit booking');
       }
@@ -181,10 +189,6 @@ try {
 
       // Auto-redirect to Calendly after 2 seconds
       setTimeout(() => {
-        if (data.calendlyLink) {
-          window.open(data.calendlyLink, '_blank');
-        }
-        // Notify parent component
         if (onComplete) {
           onComplete(data);
         }
@@ -194,7 +198,24 @@ try {
       setLoading(false);
     }
   };
-
+const timeSlots = [
+  "9:00 AM",
+  "9:30 AM",
+  "10:00 AM",
+  "10:30 AM",
+  "11:00 AM",
+  "11:30 AM",
+  "12:00 PM",
+  "12:30 PM",
+  "2:00 PM",
+  "2:30 PM",
+  "3:00 PM",
+  "3:30 PM",
+  "4:00 PM",
+  "4:30 PM",
+  "5:00 PM",
+  "5:30 PM"
+];
   // Render step content
   const renderStepContent = () => {
     switch (step) {
@@ -244,14 +265,14 @@ try {
         return (
           <div className="booking-step">
             <p className="booking-question">What's your phone number?</p>
-            <p className="booking-hint">Format: +1234567890 or +919876543210</p>
+            <p className="booking-hint">Format: 1234567890 or 919876543210</p>
             <form onSubmit={handlePhoneSubmit} className="booking-form">
               <input
                 type="tel"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
-                placeholder="+1 (555) 000-0000"
+                placeholder="Phone number"
                 className="booking-input"
                 autoFocus
               />
@@ -296,7 +317,87 @@ try {
             </form>
           </div>
         );
+        case 'date':
+  return (
+    <div className="booking-step">
+      <p className="booking-question">
+        Select your preferred date
+      </p>
 
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+
+          if (!formData.bookingDate) {
+            setError('Please select a date');
+            return;
+          }
+
+          setStep('time');
+        }}
+      >
+        <input
+          type="date"
+          name="bookingDate"
+          min={new Date().toISOString().split('T')[0]}
+          value={formData.bookingDate}
+          onChange={handleInputChange}
+          className="booking-input"
+        />
+
+        <button type="submit" className="booking-submit-btn">
+          Next
+        </button>
+      </form>
+    </div>
+  );
+  case 'time':
+  return (
+    <div className="booking-step">
+      <p className="booking-question">
+        Select your preferred time
+      </p>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+
+          if (!formData.bookingTime) {
+            setError('Please select a time');
+            return;
+          }
+        const selectedDate = new Date(formData.bookingDate);
+const day = selectedDate.getDay();
+
+if (day === 0) {
+  setError('Bookings are not available on Sundays');
+  return;
+}
+          setLoading(true);
+          submitBooking();
+        }}
+      >
+        <select
+  name="bookingTime"
+  value={formData.bookingTime}
+  onChange={handleInputChange}
+  className="booking-input"
+>
+  <option value="">Select Time</option>
+
+  {timeSlots.map((time) => (
+    <option key={time} value={time}>
+      {time}
+    </option>
+  ))}
+</select>
+
+        <button type="submit" className="booking-submit-btn" disabled={loading}>
+          Schedule Demo
+        </button>
+      </form>
+    </div>
+  );
       case 'confirmation':
         return (
           <div className="booking-step booking-confirmation">
@@ -308,8 +409,22 @@ try {
               Thanks {formData.name}! We've sent a confirmation email to <strong>{formData.email}</strong>.
             </p>
             <p className="confirmation-text">
-              Redirecting you to Calendly to schedule your demo...
-            </p>
+  Your demo session has been scheduled successfully.
+</p>
+
+{formData.meetLink && (
+  <p className="confirmation-text">
+    Google Meet Link:
+    <br />
+    <a
+      href={formData.meetLink}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Join Meeting
+    </a>
+  </p>
+)}
           </div>
         );
 
@@ -341,7 +456,7 @@ try {
           {step !== 'name' && (
             <button
               onClick={() => {
-                const steps = ['name', 'email', 'phone', 'otp'];
+                const steps = ['name', 'email', 'phone', 'otp' , 'date', 'time'];
                 const currentIndex = steps.indexOf(step);
                 if (currentIndex > 0) {
                   setStep(steps[currentIndex - 1]);
