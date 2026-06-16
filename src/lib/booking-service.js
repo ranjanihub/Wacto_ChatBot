@@ -416,7 +416,7 @@ console.log("TOKEN GENERATED:", !!token?.access_token);
     // Append to sheet
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: "'June 2026'!A:Z", // Adjust range if your sheet structure differs
+      range: "June 2026!A:Z", // Adjust range if your sheet structure differs
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,
