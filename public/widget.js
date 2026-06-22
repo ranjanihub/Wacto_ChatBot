@@ -1,44 +1,97 @@
 (function () {
-  const iframe = document.createElement("iframe");
+if (document.getElementById("wacto-chat-launcher")) return;
 
-  iframe.src = "https://wacto-chat-bot.vercel.app";
-  iframe.id = "wacto-chat-frame";
+const iframe = document.createElement("iframe");
+iframe.src = "https://wacto-chat-bot.vercel.app/embed";
+iframe.id = "wacto-chat-frame";
 
-  iframe.style.position = "fixed";
-  iframe.style.bottom = "100px";
-  iframe.style.right = "20px";
-  iframe.style.width = "400px";
-  iframe.style.height = "650px";
-  iframe.style.border = "none";
-  iframe.style.borderRadius = "12px";
-  iframe.style.boxShadow = "0 5px 20px rgba(0,0,0,.15)";
-  iframe.style.display = "none";
-  iframe.style.zIndex = "999999";
+Object.assign(iframe.style, {
+position: "fixed",
+bottom: "100px",
+right: "20px",
+width: "400px",
+height: "650px",
+border: "none",
+borderRadius: "12px",
+boxShadow: "0 5px 20px rgba(0,0,0,0.15)",
+background: "#fff",
+display: "none",
+zIndex: "999999",
+overflow: "hidden"
+});
 
-  document.body.appendChild(iframe);
+document.body.appendChild(iframe);
 
-  const button = document.createElement("div");
+const launcher = document.createElement("div");
+launcher.id = "wacto-chat-launcher";
 
-  button.id = "wacto-chat-launcher";
-
-  button.innerHTML = `
-    <img
-      src="https://wacto-chat-bot.vercel.app/wacto-logo.png"
-      style="width:60px;height:60px;border-radius:50%;cursor:pointer;"
+launcher.innerHTML = `     <img
+      src="https://wacto-chat-bot.vercel.app/logo.jpg"
+      alt="Wacto Chat"
+      style="
+        width:60px;
+        height:60px;
+        border-radius:50%;
+        cursor:pointer;
+        box-shadow:0 4px 12px rgba(0,0,0,.2);
+      "
     />
   `;
 
-  button.style.position = "fixed";
-  button.style.bottom = "100px";
-  button.style.right = "20px";
-  button.style.zIndex = "1000000";
+Object.assign(launcher.style, {
+position: "fixed",
+bottom: "100px",
+right: "20px",
+zIndex: "1000000",
+cursor: "pointer"
+});
 
-  document.body.appendChild(button);
+document.body.appendChild(launcher);
 
-  button.addEventListener("click", () => {
-    iframe.style.display =
-      iframe.style.display === "none"
-        ? "block"
-        : "none";
-  });
+launcher.addEventListener("click", () => {
+iframe.style.display =
+iframe.style.display === "none" ? "block" : "none";
+});
+
+const closeBtn = document.createElement("button");
+closeBtn.innerHTML = "✕";
+
+Object.assign(closeBtn.style, {
+position: "fixed",
+bottom: "720px",
+right: "20px",
+width: "30px",
+height: "30px",
+border: "none",
+borderRadius: "50%",
+background: "#542ccd",
+color: "#fff",
+cursor: "pointer",
+display: "none",
+zIndex: "1000001"
+});
+
+document.body.appendChild(closeBtn);
+
+launcher.addEventListener("click", () => {
+const isOpen = iframe.style.display === "block";
+
+```
+iframe.style.display = isOpen ? "none" : "block";
+closeBtn.style.display = isOpen ? "none" : "block";
+```
+
+});
+
+closeBtn.addEventListener("click", () => {
+iframe.style.display = "none";
+closeBtn.style.display = "none";
+});
+
+if (window.innerWidth < 768) {
+iframe.style.width = "95vw";
+iframe.style.height = "80vh";
+iframe.style.right = "2.5vw";
+iframe.style.bottom = "80px";
+}
 })();
