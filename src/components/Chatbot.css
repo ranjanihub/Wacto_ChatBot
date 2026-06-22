@@ -49,7 +49,8 @@
 
 @media (max-height: 800px) {
   .chat-window {
-    height: 550px;
+    height: 500px;
+    width: 320px;
   }
 }
 
