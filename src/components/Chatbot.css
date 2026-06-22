@@ -41,10 +41,6 @@
     height: 650px;
   }
 
-  .chatbot-container {
-    bottom: 100px !important;
-    right: 20px !important;
-  }
 }
 
 /* Tablet */
@@ -54,10 +50,6 @@
     height: 600px;
   }
 
-  .chatbot-container {
-    bottom: 80px !important;
-    right: 15px !important;
-  }
 }
 
 /* Mobile */
@@ -70,10 +62,6 @@
     border-radius: 16px 16px 0 0;
   }
 
-  .chatbot-container {
-    bottom: 0 !important;
-    right: 0 !important;
-  }
 }
 .chat-header {
   padding: 18px 22px;
