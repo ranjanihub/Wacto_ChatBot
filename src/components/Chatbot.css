@@ -1,6 +1,6 @@
 .chatbot-container {
   position: fixed;
-  bottom: 68px!important;
+  bottom: 0px !important;
   right: 0px!important;
   z-index: 9999;
   font-family: var(--font-sans);
