@@ -34,21 +34,45 @@
   transform-origin: bottom right;
 }
 /* Reduce height on shorter screens */
-@media (max-height: 1000px) {
+/* Desktop */
+@media (min-width: 1025px) {
   .chat-window {
+    width: 360px;
     height: 650px;
   }
-}
 
-@media (max-height: 900px) {
-  .chat-window {
-    height: 600px;
+  .chatbot-container {
+    bottom: 100px !important;
+    right: 20px !important;
   }
 }
 
-@media (max-height: 800px) {
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
   .chat-window {
-    height: 550px;
+    width: 380px;
+    height: 600px;
+  }
+
+  .chatbot-container {
+    bottom: 80px !important;
+    right: 15px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .chat-window {
+    width: 95vw;
+    height: 75vh; /* 75% of screen height */
+    max-width: 95vw;
+    max-height: 75vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .chatbot-container {
+    bottom: 0 !important;
+    right: 0 !important;
   }
 }
 .chat-header {
