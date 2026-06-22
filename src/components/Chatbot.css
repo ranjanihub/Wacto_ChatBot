@@ -37,15 +37,10 @@
 
 
 /* Tablet */
-@media (max-width: 768px) {
-  .chatbot-container{
-    bottom: 0px !important;
-}
 
-}
 
 /* Mobile */
-@media (max-width: 500px) {
+@media (max-width: 765px) {
   .chatbot-container{
     bottom: 0px !important;
 }
