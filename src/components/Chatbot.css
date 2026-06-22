@@ -34,10 +34,24 @@
   transform-origin: bottom right;
 }
 /* Reduce height on shorter screens */
+/* Reduce height on shorter screens */
+@media (max-height: 1000px) {
+  .chat-window {
+    height: 650px;
+  }
+}
 
+@media (max-height: 900px) {
+  .chat-window {
+    height: 500px;
+  }
+}
 
-/* Tablet */
-
+@media (max-height: 800px) {
+  .chat-window {
+    height: 450px;
+  }
+}
 
 /* Mobile */
 @media (max-width: 765px) {
