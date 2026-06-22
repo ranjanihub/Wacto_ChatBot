@@ -54,7 +54,7 @@
 }
 
 /* Mobile */
-@media (min-width: 765px) {
+@media (min-width: 767px) {
   .chatbot-container{
     bottom: 0px !important;
 }
