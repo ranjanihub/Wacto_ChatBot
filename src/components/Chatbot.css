@@ -36,32 +36,25 @@
 /* Reduce height on shorter screens */
 /* Desktop */
 @media (min-width: 1025px) {
-  .chat-window {
-    width: 360px;
-    height: 650px;
-  }
+  .chatbot-container{
+    bottom: 0px !important;
+}
 
 }
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1024px) {
-  .chat-window {
-    width: 380px;
-    height: 600px;
-  }
+  .chatbot-container{
+    bottom: 0px !important;
+}
 
 }
 
 /* Mobile */
 @media (max-width: 767px) {
-  .chat-window {
-    width: 95vw;
-    height: 75vh; /* 75% of screen height */
-    max-width: 95vw;
-    max-height: 75vh;
-    border-radius: 16px 16px 0 0;
-  }
-
+  .chatbot-container{
+    bottom: 0px !important;
+}
 }
 .chat-header {
   padding: 18px 22px;
