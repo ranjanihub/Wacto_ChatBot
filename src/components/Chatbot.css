@@ -43,13 +43,13 @@
 
 @media (max-height: 900px) {
   .chat-window {
-    height: 500px;
+    height: 600px;
   }
 }
 
 @media (max-height: 800px) {
   .chat-window {
-    height: 450px;
+    height: 550px;
   }
 }
 
