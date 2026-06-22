@@ -34,13 +34,7 @@
   transform-origin: bottom right;
 }
 /* Reduce height on shorter screens */
-/* Desktop */
-@media (min-width: 1025px) {
-  .chatbot-container{
-    bottom: 0px !important;
-}
 
-}
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1024px) {
