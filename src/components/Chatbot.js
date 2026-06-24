@@ -65,7 +65,7 @@ export default function Chatbot() {
       const initialBotMsg = {
         id: Date.now(),
         role: 'bot',
-        content: `Hello! Welcome to Wacto.<br/><br/>Would you like to book a demo, learn about Wacto, or ask something else?<br/><br/>Type your message below and I'll help you. 😊`,
+        content: `Hello! Welcome to Wacto.<br/><br/>How Can I help you. 😊`,
         timestamp: timeString
       };
 

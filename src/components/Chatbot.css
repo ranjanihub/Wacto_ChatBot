@@ -739,6 +739,11 @@
     gap: 12px;
   }
 
+  .chat-window {
+    height: 450px;
+    width: 300px;
+  }
+
   .booking-question {
     font-size: 15px;
   }
