@@ -387,7 +387,7 @@ export async function storeBooking(bookingData) {
       bookingData.name, // E - Client Name
       bookingData.phoneNumber, // F - Contact No
       bookingData.email, // G - Email
-      'WACTO chatbot', // H - Source
+      'Website chatbot', // H - Source
       '', '',
       'WACTO' // K - Service
     ]];
@@ -416,7 +416,7 @@ console.log("TOKEN GENERATED:", !!token?.access_token);
     // Append to sheet
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: "June 2026!A:Z", // Adjust range if your sheet structure differs
+      range: "June 26 Onwards!A:Z", // Adjust range if your sheet structure differs
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,
