@@ -26,40 +26,10 @@ const mailTransporter = nodemailer.createTransport({
     pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
-console.log("EMAIL =", process.env.GOOGLE_CLIENT_EMAIL);
-
-console.log(
-  "KEY START =",
-  process.env.GOOGLE_PRIVATE_KEY?.substring(0, 30)
-);
-
-console.log(
-  "KEY END =",
-  process.env.GOOGLE_PRIVATE_KEY?.slice(-30)
-);
-
-console.log(
-  "KEY LENGTH =",
-  process.env.GOOGLE_PRIVATE_KEY?.length
-);
-console.log(
-  "FIRST CHAR:",
-  process.env.GOOGLE_PRIVATE_KEY?.charCodeAt(0)
-);
-
-console.log(
-  "LAST CHAR:",
-  process.env.GOOGLE_PRIVATE_KEY?.charCodeAt(
-    process.env.GOOGLE_PRIVATE_KEY.length - 1
-  )
-);
 const privateKey = process.env.GOOGLE_PRIVATE_KEY
   ?.replace(/^"/, '')
   ?.replace(/"$/, '')
   ?.replace(/\\n/g, '\n');
-console.log("PRIVATE KEY VARIABLE EXISTS:", !!privateKey);
-console.log("PRIVATE KEY VARIABLE LENGTH:", privateKey?.length);
-console.log("PRIVATE KEY VARIABLE START:", privateKey?.substring(0, 40));
 const auth = new google.auth.JWT({
   email: process.env.GOOGLE_CLIENT_EMAIL,
   key: privateKey,
@@ -69,21 +39,13 @@ const auth = new google.auth.JWT({
     'https://www.googleapis.com/auth/meetings.space.created'
   ],
 });
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET
-);
-
-oauth2Client.setCredentials({
-  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-});
 const sheets = google.sheets({
   version: 'v4',
   auth,
 });
 const calendar = google.calendar({
   version: 'v3',
-  auth: oauth2Client,
+  auth,
 });
 // ============================================
 // Google Sheets Integration
