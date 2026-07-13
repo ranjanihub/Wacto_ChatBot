@@ -440,19 +440,13 @@ export async function sendConfirmationEmails(bookingData) {
               <p><strong>Email:</strong> ${email}</p>
               <p><strong>Demo Date:</strong> ${bookingDate}</p>
               <p><strong>Demo Time:</strong> ${bookingTime}</p>
-              <button style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                <a href="${bookingData.meetLink}" style="color: #fff; text-decoration: none;">
-                  Join Google Meet
-                </a>
-              </button>
+              
             </div>
            
             
             ${bookingData.meetLink ? `
             <p>
-            <a href="${bookingData.meetLink}">
-            Join Google Meet
-            </a>
+            
             </p>
             ` : ''}
             
@@ -481,10 +475,7 @@ export async function sendConfirmationEmails(bookingData) {
               <p><strong>Booked at:</strong> ${new Date().toLocaleString()}</p>
               <p><strong>Demo Date:</strong> ${bookingDate}</p>
               <p><strong>Demo Time:</strong> ${bookingTime}</p>
-              <button style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                <a href="${bookingData.meetLink}" style="color: #fff; text-decoration: none;">
-                  Join Google Meet  
-                </a>
+             
               </button>
             </div>
             
