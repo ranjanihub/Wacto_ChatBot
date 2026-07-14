@@ -606,6 +606,20 @@
   gap: 12px;
 }
 
+.booking-phone-row {
+  display: flex;
+  gap: 8px;
+}
+
+.booking-country-code-select {
+  width: 44%;
+  min-width: 130px;
+}
+
+.booking-phone-input {
+  width: 56%;
+}
+
 .booking-input {
   padding: 12px 14px;
   border: 1.5px solid #e5e7eb;
@@ -751,6 +765,15 @@
   .booking-input {
     font-size: 14px;
     padding: 11px 12px;
+  }
+
+  .booking-phone-row {
+    flex-direction: column;
+  }
+
+  .booking-country-code-select,
+  .booking-phone-input {
+    width: 100%;
   }
 
   .booking-confirmation {

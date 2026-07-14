@@ -7,11 +7,22 @@ export default function BookingFlow({ onComplete, onCancel }) {
   const [step, setStep] = useState('name'); // name, email, phone, otp, date, time, confirmation
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const countryCodeOptions = [
+    { value: '91', label: 'India (+91)' },
+    { value: '1', label: 'USA/Canada (+1)' },
+    { value: '44', label: 'UK (+44)' },
+    { value: '61', label: 'Australia (+61)' },
+    { value: '971', label: 'UAE (+971)' },
+    { value: 'other', label: 'Other (enter manually)' },
+  ];
 
   // Form state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    countryCode: '91',
+    customCountryCode: '',
+    localPhoneNumber: '',
     phoneNumber: '',
     otpCode: '',
     sessionToken: '',
@@ -28,6 +39,20 @@ export default function BookingFlow({ onComplete, onCancel }) {
       [name]: value,
     }));
     setError('');
+  };
+
+  const getNormalizedPhoneNumber = () => {
+    const selectedCode = formData.countryCode === 'other'
+      ? formData.customCountryCode
+      : formData.countryCode;
+    const countryCode = selectedCode.replace(/\D/g, '');
+    const localPhoneNumber = formData.localPhoneNumber.replace(/\D/g, '');
+
+    return {
+      countryCode,
+      localPhoneNumber,
+      fullPhoneNumber: `${countryCode}${localPhoneNumber}`,
+    };
   };
 
   // Step 1: Name
@@ -59,15 +84,31 @@ export default function BookingFlow({ onComplete, onCancel }) {
   const handlePhoneSubmit = async (e) => {
     console.log("🔥 HANDLE PHONE SUBMIT FIRED");
     e.preventDefault();
-    if (!formData.phoneNumber.trim()) {
+    const { countryCode, localPhoneNumber, fullPhoneNumber } = getNormalizedPhoneNumber();
+
+    if (!countryCode) {
+      setError('Please select or enter a country code');
+      return;
+    }
+
+    if (!localPhoneNumber) {
       setError('Please enter your phone number');
       return;
     }
 
-    // Validate phone format (E.164)
-    const phoneRegex = /^(\d{10}|\d{12})$/;
-    if (!phoneRegex.test(formData.phoneNumber)) {
-      setError('Please use format: 1234567890 or 919876543210');
+    if (countryCode.length < 1 || countryCode.length > 4) {
+      setError('Country code should be 1 to 4 digits');
+      return;
+    }
+
+    if (localPhoneNumber.length < 6 || localPhoneNumber.length > 12) {
+      setError('Phone number should be 6 to 12 digits');
+      return;
+    }
+
+    // E.164 allows up to 15 digits excluding the leading +
+    if (fullPhoneNumber.length > 15) {
+      setError('Combined country code and phone number is too long');
       return;
     }
 
@@ -78,7 +119,7 @@ export default function BookingFlow({ onComplete, onCancel }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phoneNumber: formData.phoneNumber,
+          phoneNumber: fullPhoneNumber,
         }),
       });
 
@@ -91,12 +132,13 @@ export default function BookingFlow({ onComplete, onCancel }) {
 
       setFormData(prev => ({
         ...prev,
+        phoneNumber: fullPhoneNumber,
         sessionToken: data.sessionToken,
       }));
 
       // In development, show debug OTP
       if (data.debug_otp) {
-        console.log(`🔐 Debug OTP for ${formData.phoneNumber}: ${data.debug_otp}`);
+        console.log(`🔐 Debug OTP for ${fullPhoneNumber}: ${data.debug_otp}`);
       }
 
       setStep('otp');
@@ -265,17 +307,58 @@ const timeSlots = [
         return (
           <div className="booking-step">
             <p className="booking-question">What's your phone number?</p>
-            <p className="booking-hint">Format: 1234567890 or 919876543210</p>
+            <p className="booking-hint">Choose country code and enter your phone number</p>
             <form onSubmit={handlePhoneSubmit} className="booking-form">
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="Phone number"
-                className="booking-input"
-                autoFocus
-              />
+              <div className="booking-phone-row">
+                <select
+                  name="countryCode"
+                  value={formData.countryCode}
+                  onChange={handleInputChange}
+                  className="booking-input booking-country-code-select"
+                  aria-label="Country code"
+                >
+                  {countryCodeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="tel"
+                  name="localPhoneNumber"
+                  value={formData.localPhoneNumber}
+                  onChange={(e) =>
+                    handleInputChange({
+                      target: {
+                        name: 'localPhoneNumber',
+                        value: e.target.value.replace(/\D/g, '').slice(0, 12),
+                      },
+                    })
+                  }
+                  placeholder="Phone number"
+                  className="booking-input booking-phone-input"
+                  autoFocus
+                />
+              </div>
+
+              {formData.countryCode === 'other' && (
+                <input
+                  type="tel"
+                  name="customCountryCode"
+                  value={formData.customCountryCode}
+                  onChange={(e) =>
+                    handleInputChange({
+                      target: {
+                        name: 'customCountryCode',
+                        value: e.target.value.replace(/\D/g, '').slice(0, 4),
+                      },
+                    })
+                  }
+                  placeholder="Enter country code (e.g. 65)"
+                  className="booking-input"
+                />
+              )}
               <button
                 type="submit"
                 className="booking-submit-btn"
@@ -291,7 +374,7 @@ const timeSlots = [
         return (
           <div className="booking-step">
             <p className="booking-question">Enter the 6-digit OTP</p>
-            <p className="booking-hint">Check your SMS for the code</p>
+            <p className="booking-hint">Check your WhatsApp for the code</p>
             <form onSubmit={handleOTPSubmit} className="booking-form">
               <input
                 type="text"

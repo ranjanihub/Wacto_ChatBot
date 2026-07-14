@@ -221,7 +221,7 @@ export default function Chatbot() {
     setMessages(prev => [...prev, {
       id: Date.now(),
       role: 'bot',
-      content: `Great! Your demo has been booked. 🎉<br/><br/>We've sent a confirmation <strong>Mail</strong> you can book your slot through Calendly <br/><br/>If you have any questions, feel free to ask!`,
+      content: `Great! Your demo has been booked. 🎉<br/><br/>We've sent a confirmation <strong>Mail</strong> <br/><br/>If you have any questions, feel free to ask!`,
       timestamp: timeString
     }]);
 
