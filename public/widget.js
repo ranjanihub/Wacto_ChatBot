@@ -1,97 +1,97 @@
 (function () {
-if (document.getElementById("wacto-chat-launcher")) return;
+  if (document.getElementById("wacto-chat-launcher")) return;
 
-const iframe = document.createElement("iframe");
-iframe.src = "https://wacto-chat-bot.vercel.app/embed";
-iframe.id = "wacto-chat-frame";
+  // Determine current script origin or fallback to Vercel production host
+  let scriptHost = "https://wacto-chat-bot.vercel.app";
+  const currentScript = document.currentScript;
+  if (currentScript && currentScript.src) {
+    try {
+      const url = new URL(currentScript.src);
+      scriptHost = url.origin;
+    } catch (e) {}
+  }
 
-Object.assign(iframe.style, {
-position: "fixed",
-bottom: "100px",
-right: "20px",
-width: "400px",
-height: "650px",
-border: "none",
-borderRadius: "12px",
-boxShadow: "0 5px 20px rgba(0,0,0,0.15)",
-background: "transparent",
-display: "none",
-zIndex: "-100",
-overflow: "hidden"
-});
+  // Create Iframe
+  const iframe = document.createElement("iframe");
+  iframe.src = scriptHost + "/widget";
+  iframe.id = "wacto-chat-frame";
+  iframe.title = "Wacto AI Chatbot";
 
-document.body.appendChild(iframe);
+  Object.assign(iframe.style, {
+    position: "fixed",
+    bottom: "95px",
+    right: "20px",
+    width: "380px",
+    height: "630px",
+    border: "none",
+    borderRadius: "16px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+    background: "transparent",
+    display: "none",
+    zIndex: "999998",
+    overflow: "hidden",
+    transition: "opacity 0.2s ease, transform 0.2s ease"
+  });
 
-const launcher = document.createElement("div");
-launcher.id = "wacto-chat-launcher";
+  document.body.appendChild(iframe);
 
-launcher.innerHTML = `     <img
-      src="https://wacto-chat-bot.vercel.app/logo.jpg"
+  // Floating launcher button
+  const launcher = document.createElement("div");
+  launcher.id = "wacto-chat-launcher";
+
+  launcher.innerHTML = `
+    <img
+      src="${scriptHost}/logo.jpg"
       alt="Wacto Chat"
       style="
-        width:60px;
-        height:60px;
-        border-radius:50%;
-        cursor:pointer;
-        box-shadow:0 4px 12px rgba(0,0,0,.2);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        object-fit: cover;
+        display: block;
       "
     />
   `;
 
-Object.assign(launcher.style, {
-position: "fixed",
-bottom: "100px",
-right: "20px",
-zIndex: "999999",
-cursor: "pointer"
-});
+  Object.assign(launcher.style, {
+    position: "fixed",
+    bottom: "25px",
+    right: "20px",
+    zIndex: "999999",
+    cursor: "pointer"
+  });
 
-document.body.appendChild(launcher);
+  document.body.appendChild(launcher);
 
-launcher.addEventListener("click", () => {
-iframe.style.display =
-iframe.style.display === "none" ? "block" : "none";
-});
+  let isOpen = false;
 
-const closeBtn = document.createElement("button");
-closeBtn.innerHTML = "✕";
+  launcher.addEventListener("click", () => {
+    isOpen = !isOpen;
+    if (isOpen) {
+      iframe.style.display = "block";
+      iframe.style.zIndex = "999999";
+    } else {
+      iframe.style.display = "none";
+    }
+  });
 
-Object.assign(closeBtn.style, {
-position: "fixed",
-bottom: "720px",
-right: "20px",
-width: "30px",
-height: "30px",
-border: "none",
-borderRadius: "50%",
-background: "#542ccd",
-color: "#fff",
-cursor: "pointer",
-display: "none",
-zIndex: "1000000"
-});
+  // Responsive adjustments for mobile screens
+  function handleResize() {
+    if (window.innerWidth < 480) {
+      iframe.style.width = "92vw";
+      iframe.style.height = "80vh";
+      iframe.style.right = "4vw";
+      iframe.style.bottom = "95px";
+    } else {
+      iframe.style.width = "380px";
+      iframe.style.height = "630px";
+      iframe.style.right = "20px";
+      iframe.style.bottom = "95px";
+    }
+  }
 
-document.body.appendChild(closeBtn);
-
-launcher.addEventListener("click", () => {
-const isOpen = iframe.style.display === "block";
-
-```
-iframe.style.display = isOpen ? "none" : "block";
-closeBtn.style.display = isOpen ? "none" : "block";
-```
-
-});
-
-closeBtn.addEventListener("click", () => {
-iframe.style.display = "none";
-closeBtn.style.display = "none";
-});
-
-if (window.innerWidth < 768) {
-iframe.style.width = "95vw";
-iframe.style.height = "80vh";
-iframe.style.right = "2.5vw";
-iframe.style.bottom = "80px";
-}
+  window.addEventListener("resize", handleResize);
+  handleResize();
 })();

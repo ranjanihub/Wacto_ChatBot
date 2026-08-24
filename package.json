@@ -2,6 +2,18 @@
   "name": "wacto-chatbot",
   "version": "0.1.0",
   "private": true,
+  "description": "A Next.js chatbot application with RAG (Retrieval-Augmented Generation) capabilities for answering questions about Wacto.in using live website data.",
+  "homepage": "https://github.com/ranjanihub/Wacto_ChatBot#readme",
+  "bugs": {
+    "url": "https://github.com/ranjanihub/Wacto_ChatBot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ranjanihub/Wacto_ChatBot.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "main": "eval_rag.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -33,9 +45,5 @@
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "16.2.4"
-  },
-  "description": "A Next.js chatbot application with RAG (Retrieval-Augmented Generation) capabilities for answering questions about Wacto.in using live website data.",
-  "main": "eval_rag.js",
-  "author": "",
-  "license": "ISC"
+  }
 }

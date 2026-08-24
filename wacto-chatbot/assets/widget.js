@@ -1,46 +1,61 @@
 (function () {
+  if (document.getElementById("wacto-chat-launcher")) return;
 
-    // Chat button
-    const btn = document.createElement("button");
+  let scriptHost = "https://wacto-chat-bot.vercel.app";
+  const currentScript = document.currentScript;
+  if (currentScript && currentScript.src) {
+    try {
+      const url = new URL(currentScript.src);
+      scriptHost = url.origin;
+    } catch (e) {}
+  }
 
-    btn.innerHTML = "";
+  const iframe = document.createElement("iframe");
+  iframe.src = scriptHost + "/widget";
+  iframe.id = "wacto-chat-frame";
+  iframe.title = "Wacto AI Chatbot";
 
-    btn.style.position = "fixed";
-    btn.style.bottom = "130px";
-    btn.style.right = "20px";
-    btn.style.width = "60px";
-    btn.style.height = "60px";
-    btn.style.borderRadius = "50%";
-    btn.style.border = "none";
-    btn.style.cursor = "pointer";
-    btn.style.zIndex = "1999999";
+  Object.assign(iframe.style, {
+    position: "fixed",
+    bottom: "95px",
+    right: "20px",
+    width: "380px",
+    height: "630px",
+    border: "none",
+    borderRadius: "16px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+    background: "transparent",
+    display: "none",
+    zIndex: "999998",
+    overflow: "hidden"
+  });
 
-    document.body.appendChild(btn);
+  document.body.appendChild(iframe);
 
-    // iframe hidden initially
-    const iframe = document.createElement("iframe");
+  const launcher = document.createElement("div");
+  launcher.id = "wacto-chat-launcher";
+  launcher.innerHTML = `
+    <img
+      src="${scriptHost}/logo.jpg"
+      alt="Wacto Chat"
+      style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.25); object-fit: cover; display: block;"
+    />
+  `;
 
-    iframe.src = "https://wacto-chat-bot.vercel.app/widget";
+  Object.assign(launcher.style, {
+    position: "fixed",
+    bottom: "25px",
+    right: "20px",
+    zIndex: "999999",
+    cursor: "pointer"
+  });
 
-    iframe.style.position = "fixed";
-    iframe.style.bottom = "200px";
-    iframe.style.right = "20px";
-    iframe.style.width = "380px";
-    iframe.style.height = "650px";
-    iframe.style.border = "none";
-    iframe.style.zIndex = "-999999";
-    iframe.style.background = "transparent";
+  document.body.appendChild(launcher);
 
-    iframe.style.display = "none";
-
-    document.body.appendChild(iframe);
-
-    btn.addEventListener("click", () => {
-        const willOpen = iframe.style.display === "none";
-
-        iframe.style.display = willOpen ? "block" : "none";
-        iframe.style.zIndex = willOpen ? "1999999" : "-9990";
-
-    });
-
+  let isOpen = false;
+  launcher.addEventListener("click", () => {
+    isOpen = !isOpen;
+    iframe.style.display = isOpen ? "block" : "none";
+    iframe.style.zIndex = isOpen ? "999999" : "999998";
+  });
 })();

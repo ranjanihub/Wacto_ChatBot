@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wacto Chatbot Embed Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f4f6f9;
+      color: #333;
+    }
+    .card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+    h2 { margin-top: 0; }
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Wacto Chatbot - Iframe & Embed Test Page</h1>
+    <p>This page demonstrates how to embed the Wacto Chatbot widget on any website.</p>
+  </div>
+
+  <div class="card">
+    <h2>Method 1: Direct Iframe Embedding</h2>
+    <p>Renders the exact chatbot widget inside a fixed container or iframe on your site:</p>
+    <pre><code>&lt;iframe 
+  src="https://your-vercel-domain.vercel.app/widget" 
+  width="380" 
+  height="630" 
+  style="border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"
+  title="Wacto AI Chatbot"&gt;
+&lt;/iframe&gt;</code></pre>
+  </div>
+
+  <div class="card">
+    <h2>Method 2: One-Line Script Embedding</h2>
+    <p>Injects the floating launcher icon in the bottom-right corner of any site and opens the chatbot frame when clicked:</p>
+    <pre><code>&lt;script src="https://your-vercel-domain.vercel.app/widget.js" defer&gt;&lt;/script&gt;</code></pre>
+  </div>
+
+</body>
+</html>

@@ -8,7 +8,7 @@ export default function WidgetPage() {
       background: "transparent",
       overflow: "hidden"
     }}>
-      <Chatbot />
+      <Chatbot initialOpen={true} standalone={true} />
     </div>
   );
 }
