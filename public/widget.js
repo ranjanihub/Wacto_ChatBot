@@ -14,9 +14,9 @@ height: "650px",
 border: "none",
 borderRadius: "12px",
 boxShadow: "0 5px 20px rgba(0,0,0,0.15)",
-background: "#fff",
+background: "transparent",
 display: "none",
-zIndex: "999999",
+zIndex: "-100",
 overflow: "hidden"
 });
 
@@ -42,7 +42,7 @@ Object.assign(launcher.style, {
 position: "fixed",
 bottom: "100px",
 right: "20px",
-zIndex: "1000000",
+zIndex: "999999",
 cursor: "pointer"
 });
 
@@ -68,7 +68,7 @@ background: "#542ccd",
 color: "#fff",
 cursor: "pointer",
 display: "none",
-zIndex: "1000001"
+zIndex: "1000000"
 });
 
 document.body.appendChild(closeBtn);

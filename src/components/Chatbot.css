@@ -3,6 +3,7 @@
   bottom: 65px !important;
   right: 0px!important;
   z-index: 9999;
+  isolation: isolate;
   font-family: var(--font-sans);
 }
 

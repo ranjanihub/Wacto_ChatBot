@@ -28,7 +28,7 @@
     iframe.style.width = "380px";
     iframe.style.height = "650px";
     iframe.style.border = "none";
-    iframe.style.zIndex = "999998";
+    iframe.style.zIndex = "-9990";
 
     iframe.style.display = "none";
 
