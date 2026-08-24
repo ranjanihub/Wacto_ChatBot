@@ -13,7 +13,7 @@
     btn.style.borderRadius = "50%";
     btn.style.border = "none";
     btn.style.cursor = "pointer";
-    btn.style.zIndex = "999999";
+    btn.style.zIndex = "1999999";
 
     document.body.appendChild(btn);
 
@@ -28,18 +28,18 @@
     iframe.style.width = "380px";
     iframe.style.height = "650px";
     iframe.style.border = "none";
-    iframe.style.zIndex = "-9990";
+    iframe.style.zIndex = "-999999";
+    iframe.style.background = "transparent";
 
     iframe.style.display = "none";
 
     document.body.appendChild(iframe);
 
     btn.addEventListener("click", () => {
+        const willOpen = iframe.style.display === "none";
 
-        iframe.style.display =
-            iframe.style.display === "none"
-                ? "block"
-                : "none";
+        iframe.style.display = willOpen ? "block" : "none";
+        iframe.style.zIndex = willOpen ? "1999999" : "-9990";
 
     });
 
