@@ -5,7 +5,8 @@
  * Usage: node test-webhook.js
  */
 
-require('dotenv').config({ path: '.env.local' });
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
 
