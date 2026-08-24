@@ -124,5 +124,5 @@ main,
 
 div[hidden] {
   position: relative;
-  z-index: 0 !important;
+  z-index: -999999999;
 }

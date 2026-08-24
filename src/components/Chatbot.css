@@ -2,7 +2,7 @@
   position: fixed;
   bottom: 65px !important;
   right: 0px!important;
-  z-index: 2147483000;
+  z-index: 999999999999999999999999999;
   isolation: isolate;
   font-family: var(--font-sans);
 }
