@@ -121,3 +121,8 @@ main,
 .main-content {
   background: none !important;
 }
+
+div[hidden] {
+  position: relative;
+  z-index: 0 !important;
+}
