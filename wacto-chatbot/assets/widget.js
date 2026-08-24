@@ -26,7 +26,7 @@
     boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
     background: "transparent",
     display: "none",
-    zIndex: "999998",
+    zIndex: "-100",
     overflow: "hidden"
   });
 
@@ -55,7 +55,14 @@
   let isOpen = false;
   launcher.addEventListener("click", () => {
     isOpen = !isOpen;
-    iframe.style.display = isOpen ? "block" : "none";
-    iframe.style.zIndex = isOpen ? "999999" : "999998";
+    if (isOpen) {
+      // When OPENED: Set high z-index so chat window is on top
+      iframe.style.display = "block";
+      iframe.style.zIndex = "999999";
+    } else {
+      // When CLOSED: Set low z-index and hide so website buttons work 100%
+      iframe.style.display = "none";
+      iframe.style.zIndex = "-100";
+    }
   });
 })();

@@ -5,6 +5,11 @@
   z-index: 999999999999999999999999999;
   isolation: isolate;
   font-family: var(--font-sans);
+  pointer-events: none;
+}
+
+.chat-fab, .chat-window {
+  pointer-events: auto;
 }
 
 .chatbot-container.standalone {
