@@ -13,6 +13,7 @@
   },
   "license": "ISC",
   "author": "",
+  "type": "commonjs",
   "main": "eval_rag.js",
   "scripts": {
     "dev": "next dev",

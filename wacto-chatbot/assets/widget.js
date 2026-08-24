@@ -1,68 +1,46 @@
 (function () {
-  if (document.getElementById("wacto-chat-launcher")) return;
 
-  let scriptHost = "https://wacto-chat-bot.vercel.app";
-  const currentScript = document.currentScript;
-  if (currentScript && currentScript.src) {
-    try {
-      const url = new URL(currentScript.src);
-      scriptHost = url.origin;
-    } catch (e) {}
-  }
+    // Chat button
+    const btn = document.createElement("button");
 
-  const iframe = document.createElement("iframe");
-  iframe.src = scriptHost + "/widget";
-  iframe.id = "wacto-chat-frame";
-  iframe.title = "Wacto AI Chatbot";
+    btn.innerHTML = "";
 
-  Object.assign(iframe.style, {
-    position: "fixed",
-    bottom: "95px",
-    right: "20px",
-    width: "380px",
-    height: "630px",
-    border: "none",
-    borderRadius: "16px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-    background: "transparent",
-    display: "none",
-    zIndex: "-100",
-    overflow: "hidden"
-  });
+    btn.style.position = "fixed";
+    btn.style.bottom = "130px";
+    btn.style.right = "20px";
+    btn.style.width = "60px";
+    btn.style.height = "60px";
+    btn.style.borderRadius = "50%";
+    btn.style.border = "none";
+    btn.style.cursor = "pointer";
+    btn.style.zIndex = "1999999";
 
-  document.body.appendChild(iframe);
+    document.body.appendChild(btn);
 
-  const launcher = document.createElement("div");
-  launcher.id = "wacto-chat-launcher";
-  launcher.innerHTML = `
-    <img
-      src="${scriptHost}/logo.jpg"
-      alt="Wacto Chat"
-      style="width: 60px; height: 60px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.25); object-fit: cover; display: block;"
-    />
-  `;
+    // iframe hidden initially
+    const iframe = document.createElement("iframe");
 
-  Object.assign(launcher.style, {
-    position: "fixed",
-    bottom: "25px",
-    right: "20px",
-    zIndex: "999999",
-    cursor: "pointer"
-  });
+    iframe.src = "https://wacto-chat-bot.vercel.app/widget";
 
-  document.body.appendChild(launcher);
+    iframe.style.position = "fixed";
+    iframe.style.bottom = "200px";
+    iframe.style.right = "20px";
+    iframe.style.width = "380px";
+    iframe.style.height = "650px";
+    iframe.style.border = "none";
+    iframe.style.zIndex = "-999999";
+    iframe.style.background = "transparent";
 
-  let isOpen = false;
-  launcher.addEventListener("click", () => {
-    isOpen = !isOpen;
-    if (isOpen) {
-      // When OPENED: Set high z-index so chat window is on top
-      iframe.style.display = "block";
-      iframe.style.zIndex = "999999";
-    } else {
-      // When CLOSED: Set low z-index and hide so website buttons work 100%
-      iframe.style.display = "none";
-      iframe.style.zIndex = "-100";
-    }
-  });
+    iframe.style.display = "none";
+
+    document.body.appendChild(iframe);
+
+    btn.addEventListener("click", () => {
+        const willOpen = iframe.style.display === "none";
+
+        iframe.style.display = willOpen ? "block" : "none";
+        iframe.style.zIndex = willOpen ? "1999999" : "-9990";
+
+    });
+
 })();

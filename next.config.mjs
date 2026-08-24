@@ -3,7 +3,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        source: "/widget",
         headers: [
           {
             key: "Content-Security-Policy",

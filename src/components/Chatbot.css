@@ -5,28 +5,6 @@
   z-index: 999999999999999999999999999;
   isolation: isolate;
   font-family: var(--font-sans);
-  pointer-events: none;
-}
-
-.chat-fab, .chat-window {
-  pointer-events: auto;
-}
-
-.chatbot-container.standalone {
-  position: relative !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  height: 100vh !important;
-}
-
-.chatbot-container.standalone .chat-window {
-  width: 100% !important;
-  height: 100vh !important;
-  max-width: 100% !important;
-  max-height: 100vh !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
 }
 
 .chat-fab {
