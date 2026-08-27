@@ -400,7 +400,7 @@ class WactoRAGService {
         url: 'https://wacto.in/about-wacto-whatsapp-business-api/'
       },
       {
-        text: "Wacto Services and Features:\n• WhatsApp API Integration - Connect your business directly to WhatsApp\n• Automated Messaging - Send bulk messages, automated replies, notifications\n• AI Chatbots - Customer support through intelligent chatbots\n• CRM Integration - Connect with your existing CRM systems\n• Lead Capture Forms - Capture leads directly from chat\n• Shared Team Inbox - Manage multiple conversations\n• Analytics & Reporting - Track messages, engagement, ROI\n• Bluetick Branding - Show verified status\n• Click-to-Chat Ads - WhatsApp ads integration",
+        text: "Wacto Services and Features:\n• WhatsApp API Integration - Connect your business directly to WhatsApp\n• Automated Messaging - Send bulk messages, automated replies, notifications\n• AI Chatbots - Customer support through intelligent chatbots\n• CRM Integration - Connect with your existing CRM systems\n• Lead Capture Forms - Capture leads directly from chat\n• Shared Team Inbox - Manage multiple conversations\n• Analytics & Reporting - Track messages, engagement, ROI \n• Instagram automation \n• Bluetick Branding - Show verified status\n• Click-to-Chat Ads - WhatsApp ads integration",
         source: 'fallback-features',
         url: 'https://wacto.in/'
       },
@@ -596,6 +596,7 @@ Return ONLY these core services:
 • WhatsApp QR Code Solutions<br>
 • Website Chat Widget<br>
 • WhatsApp Chatbot<br>
+• Instagram automation<br>
 • Lead Capture Forms<br><br>
 
 
@@ -686,7 +687,7 @@ ${context}
       'price': "Wacto offers flexible pricing plans for all business sizes. Contact our sales team for a custom quote.",
       'feature': "Key features: WhatsApp API integration, automated messaging, AI chatbots, bulk messaging, CRM integration, and analytics.",
       'api': "Our WhatsApp Business API provides reliable messaging with automation, analytics, and seamless integrations.",
-      'service': "Wacto provides WhatsApp API solutions, chatbots, automation, bulk messaging, and customer communication tools.",
+      'service': "Wacto provides WhatsApp API solutions, chatbots, automation, bulk messaging, Instagram automation, and customer communication tools.",
       'demo': "Visit https://wacto.in/videos/ for demo videos or contact us to schedule a live demo.",
       'integration': "We integrate with popular CRM systems, e-commerce platforms, and business applications for seamless communication."
     };
