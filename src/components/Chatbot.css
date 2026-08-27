@@ -35,27 +35,7 @@
   flex-direction: column;
   overflow: hidden;
   background: #ffffff;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-}
-/* Reduce height on shorter screens */
-/* Reduce height on shorter screens */
-@media (max-height: 1000px) {
-  .chat-window {
-    height: 650px;
-  }
-}
-
-@media (max-height: 900px) {
-  .chat-window {
-    height: 600px;
-  }
-}
-
-@media (max-height: 800px) {
-  .chat-window {
-    height: 500px;
-    width: 320px;
-  }
+  box-shadow: none;
 }
 
 /* Mobile */
