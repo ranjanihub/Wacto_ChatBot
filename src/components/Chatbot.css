@@ -1,11 +1,11 @@
 .chatbot-container {
   position: fixed;
-  bottom: 65px !important;
+  bottom: 0px !important;
   right: 0px!important;
   z-index: 9999999999999;
   isolation: isolate;
   font-family: var(--font-sans);
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .chat-fab {
