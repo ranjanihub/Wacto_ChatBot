@@ -2,18 +2,17 @@
   if (document.getElementById("wacto-chat-launcher")) return;
 
   const iframe = document.createElement("iframe");
-  iframe.src = "https://wacto-chat-bot.vercel.app/embed";
+  iframe.src = "https://wacto-chat-bot.vercel.app/widget";
   iframe.id = "wacto-chat-frame";
 
   Object.assign(iframe.style, {
     position: "fixed",
     bottom: "90px",
     right: "20px",
-    width: "400px",
-    height: "650px",
+    width: "380px",
+    height: "620px",
     border: "none",
-    borderRadius: "12px",
-    boxShadow: "0 5px 20px rgba(0,0,0,0.15)",
+    borderRadius: "16px",
     background: "transparent",
     display: "none",
     zIndex: "999999",
