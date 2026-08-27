@@ -4,11 +4,11 @@ export default function WidgetPage() {
   return (
     <div style={{
       width: "100%",
-      height: "100vh",
+      height: "100%",
       background: "transparent",
       overflow: "hidden"
     }}>
-      <Chatbot />
+      <Chatbot initialOpen={true} hideFab={true} />
     </div>
   );
 }

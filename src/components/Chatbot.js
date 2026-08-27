@@ -5,8 +5,8 @@ import { Minus, Send, Bot, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import BookingFlow from './BookingFlow';
 import './Chatbot.css';
 
-export default function Chatbot() {
-  const [isOpen, setIsOpen] = useState(false); // Hidden by default, opens on click
+export default function Chatbot({ initialOpen = false, hideFab = false }) {
+  const [isOpen, setIsOpen] = useState(initialOpen); // Default state based on prop
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -261,7 +261,7 @@ export default function Chatbot() {
   return (
     <div className="chatbot-container">
       {/* Floating Action Button */}
-      {!isOpen && (
+      {!isOpen && !hideFab && (
         <button 
           className="chat-fab animate-fade-in" 
           onClick={toggleChat}
