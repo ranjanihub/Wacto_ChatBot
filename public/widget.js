@@ -80,6 +80,13 @@
     closeBtn.style.display = "none";
   });
 
+  window.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "WACTO_WIDGET_CLOSE") {
+      iframe.style.display = "none";
+      closeBtn.style.display = "none";
+    }
+  });
+
   if (window.innerWidth < 768) {
     iframe.style.width = "95vw";
     iframe.style.height = "80vh";

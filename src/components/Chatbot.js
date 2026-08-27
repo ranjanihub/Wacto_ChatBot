@@ -53,7 +53,15 @@ export default function Chatbot({ initialOpen = false, hideFab = false }) {
     }
   }, [messages, isTyping, autoScroll]);
 
-  const toggleChat = () => setIsOpen(!isOpen);
+  const toggleChat = () => {
+    if (hideFab) {
+      try {
+        window.parent.postMessage({ type: 'WACTO_WIDGET_CLOSE' }, '*');
+      } catch (e) {}
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
 
   // When the chat window is opened and there are no messages yet,
   // insert the initial bot/system message and default chips.
