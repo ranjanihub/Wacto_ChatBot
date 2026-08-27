@@ -5,9 +5,11 @@
   z-index: 999999999999999999999999999;
   isolation: isolate;
   font-family: var(--font-sans);
+  pointer-events: none;
 }
 
 .chat-fab {
+  pointer-events: auto;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -22,6 +24,7 @@
 }
 
 .chat-window {
+  pointer-events: auto;
   width: 360px;
   height: 600px;
   max-height: calc(100vh - 20px);
