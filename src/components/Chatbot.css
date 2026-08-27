@@ -2,7 +2,7 @@
   position: fixed;
   bottom: 0px !important;
   right: 0px!important;
-  z-index: 9999999999999;
+  z-index: 2147483647;
   isolation: isolate;
   font-family: var(--font-sans);
   pointer-events: auto;
