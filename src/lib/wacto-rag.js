@@ -10,21 +10,11 @@ const CHROMA_DIR = path.join(__dirname, '../../.chroma');
 
 class WactoRAGService {
   constructor() {
-    const groqApiKey = process.env.GROQ_API_KEY;
-
-    if (!groqApiKey || groqApiKey === 'your_groq_api_key_here') {
-      console.warn('⚠️  GROQ API key not configured.');
-      this.demoMode = true;
-      this.chromaVectorStore = null;
-      this.isInitialized = false;
-      return;
-    }
-
     this.demoMode = false;
     this.chromaVectorStore = null;
     this.isInitialized = false;
     this.inMemoryDocuments = [];
-    this.groqApiKey = groqApiKey;
+    this.groqApiKey = process.env.GROQ_API_KEY;
     
     console.log('✅ Wacto AI Service initialized - using ChromaDB for knowledge storage');
   }
@@ -637,20 +627,23 @@ ${context}
         { role: 'user', content: userPrompt }
       ];
 
+      const apiKey = process.env.GROQ_API_KEY || this.groqApiKey;
+      const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+
       const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.groqApiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: model,
           messages: [
             { role: 'system', content: systemPrompt },
             ...messages
           ],
           temperature: 0.2,
-          max_tokens: 150,
+          max_tokens: 500,
           top_p: 0.3,
           frequency_penalty: 1.0
         })
