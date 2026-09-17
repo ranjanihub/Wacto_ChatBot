@@ -53,9 +53,14 @@ function detectIntent(message) {
   if (/\bcontact|sales|partnership|collaboration|inquiry|enquiry|quote|proposal|enterprise\b/i.test(lowerMessage)) {
     return 'sales';
   }
+
+  // Check if specifically asking about Wacto
+  if (/\bwacto|durga|sekher|gunasekaran\b/i.test(lowerMessage)) {
+    return 'wacto_general';
+  }
   
-  // Default to general business intent (always Wacto-focused)
-  return 'wacto_general';
+  // For other questions (e.g. who is X, general knowledge, outside topics)
+  return 'general_search';
 }
 
 // Function to generate chips based on intent - Maximum 4 chips per intent
@@ -108,6 +113,12 @@ function generateChips(intent) {
       { label: "Services", action: "message", value: "What services does Wacto offer" },
       { label: "Book Demo", action: "message", value: "Book a demo" },
       { label: "Contact", action: "message", value: "Contact Wacto team" }
+    ],
+    general_search: [
+      { label: "About Wacto", action: "message", value: "Tell me about Wacto" },
+      { label: "WhatsApp API", action: "message", value: "What is WhatsApp API?" },
+      { label: "Pricing Plans", action: "message", value: "Show me pricing plans" },
+      { label: "Book Demo", action: "message", value: "Book a demo" }
     ]
   };
   
