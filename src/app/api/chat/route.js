@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { wactoRAG } from '@/lib/wacto-rag';
 
 /**
- * SIMPLIFIED CHAT API - GROQ LLM ONLY
+ * SIMPLIFIED CHAT API - GEMINI LLM ONLY
  *
  * Architecture:
- * Chatbot UI → This API → Groq LLM (via wactoRAG) → Response back
+ * Chatbot UI → This API → Gemini LLM (via wactoRAG) → Response back
  *
- * NO n8n or webhook dependency. All AI processing is done by Groq LLM.
+ * NO n8n or webhook dependency. All AI processing is done by Gemini LLM.
  */
 
 // Intent detection function - Wacto business-focused
@@ -142,12 +142,12 @@ export async function POST(req) {
     const userIntent = detectIntent(message);
     console.log('🎯 Detected intent:', userIntent);
 
-    // Call Groq LLM via wactoRAG with conversation history
+    // Call Gemini LLM via wactoRAG with conversation history
     let botReply;
     try {
       botReply = await wactoRAG.queryWactoInfo(message, history);
     } catch (llmError) {
-      console.error('❌ Error from Groq LLM:', llmError.message);
+      console.error('❌ Error from Gemini LLM:', llmError.message);
       return NextResponse.json({
         error: 'AI service unavailable',
         reply: '❌ AI service is temporarily unavailable. Please try again later.',
@@ -169,7 +169,7 @@ export async function POST(req) {
     // Return to chatbot with chips
     return NextResponse.json({
       reply: String(botReply).trim(),
-      source: 'groq-llm',
+      source: 'gemini-llm',
       detectedLanguage: 'en',
       detectedIntent: userIntent,
       chips: chips,

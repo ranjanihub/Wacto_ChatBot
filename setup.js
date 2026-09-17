@@ -36,30 +36,30 @@ async function setup() {
     }
   }
 
-  // Check for OpenAI API key
-  const openaiKeyMatch = envContent.match(/OPENAI_API_KEY=(.+)/);
-  let openaiKey = openaiKeyMatch ? openaiKeyMatch[1].trim() : '';
+  // Check for Gemini API key
+  const geminiKeyMatch = envContent.match(/GEMINI_API_KEY=(.+)/);
+  let geminiKey = geminiKeyMatch ? geminiKeyMatch[1].trim() : '';
 
-  if (openaiKey && openaiKey !== 'your_openai_api_key_here' && !openaiKey.startsWith('sk-proj-B8Tdm3Z0GtwHX')) {
-    console.log('✅ OpenAI API key is already configured');
+  if (geminiKey && geminiKey !== 'your_gemini_api_key_here') {
+    console.log('✅ Gemini API key is already configured');
   } else {
-    console.log('\n🔑 OpenAI API Key Required');
-    console.log('Get your API key from: https://platform.openai.com/api-keys');
-    console.log('This is used for both Wacto RAG responses and general chat functionality.\n');
+    console.log('\n🔑 Google Gemini API Key Required');
+    console.log('Get your API key from: https://aistudio.google.com/app/apikey');
+    console.log('This is used for Wacto RAG responses and chatbot functionality.\n');
 
-    openaiKey = await askQuestion('Enter your OpenAI API key: ');
+    geminiKey = await askQuestion('Enter your Gemini API key: ');
 
-    if (!openaiKey || openaiKey.trim() === '') {
-      console.log('❌ OpenAI API key is required for chatbot functionality');
+    if (!geminiKey || geminiKey.trim() === '') {
+      console.log('❌ Gemini API key is required for chatbot functionality');
       rl.close();
       return;
     }
 
     // Update env content
-    if (envContent.includes('OPENAI_API_KEY=')) {
-      envContent = envContent.replace(/OPENAI_API_KEY=.*/, `OPENAI_API_KEY=${openaiKey.trim()}`);
+    if (envContent.includes('GEMINI_API_KEY=')) {
+      envContent = envContent.replace(/GEMINI_API_KEY=.*/, `GEMINI_API_KEY=${geminiKey.trim()}`);
     } else {
-      envContent += `\nOPENAI_API_KEY=${openaiKey.trim()}`;
+      envContent += `\nGEMINI_API_KEY=${geminiKey.trim()}`;
     }
   }
 

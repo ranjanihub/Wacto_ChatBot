@@ -216,7 +216,6 @@
 .message-bubble {
   padding: 14px 16px;
   font-size: 14px;
-  line-height: 1.5;
   word-wrap: break-word;
   position: relative;
   background: #ffffff;
@@ -225,19 +224,24 @@
   box-shadow: 0 6px 18px rgba(72,99,247,0.08);
 }
 
+.message-bubble strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
 .message-bubble.bot {
   border-radius: 16px 16px 16px 8px;
   margin-left: 48px;
 }
 
 .message-bubble.bot a {
-  color: #60a5fa;
+  color: #2563eb;
   text-decoration: underline;
   font-weight: 500;
 }
 
 .message-bubble.bot a:hover {
-  color: #93c5fd;
+  color: #1d4ed8;
   text-decoration: none;
 }
 

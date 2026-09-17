@@ -1,5 +1,5 @@
 // Test script for Wacto RAG functionality
-import { wactoRAG } from './src/lib/wacto-rag';
+import { wactoRAG } from './src/lib/wacto-rag.js';
 
 async function testRAG() {
   console.log('Testing Wacto RAG functionality...\n');
@@ -27,9 +27,7 @@ async function testRAG() {
   }
 }
 
-// Run test if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  testRAG().catch(console.error);
-}
+// Run test
+testRAG().catch(console.error);
 
 export { testRAG };
