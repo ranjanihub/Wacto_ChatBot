@@ -366,13 +366,14 @@ Partnership Page: https://wacto.in/partnership/`,
   }
 
   async queryWactoInfo(question, history = []) {
+    let relevantDocs = [];
     try {
       if (!this.isInitialized) {
         await this.initializeDocuments();
       }
 
       // Retrieve top relevant website chunks
-      const relevantDocs = await this.retrieveRelevantDocuments(question, 4);
+      relevantDocs = await this.retrieveRelevantDocuments(question, 4);
       console.log(`📖 Retrieved ${relevantDocs.length} relevant document chunks from website data`);
 
       // Build context
@@ -418,7 +419,7 @@ ${context}
       const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || this.geminiApiKey;
       if (!apiKey) {
         console.warn('⚠️ Gemini API key not found in environment, using fallback response');
-        return this.getFallbackResponse(question);
+        return this.getFallbackResponse(question, relevantDocs);
       }
 
       const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
@@ -436,20 +437,39 @@ ${context}
 
       // Prepare conversation history formatted for Gemini
       const geminiHistory = [];
-      for (const h of history.slice(-6)) {
-        const role = h.role === 'assistant' ? 'model' : 'user';
+      for (const h of history.slice(-8)) {
+        // Map frontend roles ('bot', 'assistant', 'model') to Gemini's 'model', otherwise 'user'
+        const role = (h.role === 'assistant' || h.role === 'bot' || h.role === 'model') ? 'model' : 'user';
         if (!h.content) continue;
+
+        // Gemini chat history MUST begin with a 'user' turn
         if (geminiHistory.length === 0 && role !== 'user') {
           continue;
         }
+
+        // Clean HTML tags and excessive whitespace from history
+        const cleanContent = h.content
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!cleanContent) continue;
+
         if (geminiHistory.length > 0 && geminiHistory[geminiHistory.length - 1].role === role) {
-          geminiHistory[geminiHistory.length - 1].parts[0].text += '\n' + h.content.slice(0, 250);
+          geminiHistory[geminiHistory.length - 1].parts[0].text += '\n' + cleanContent.slice(0, 500);
         } else {
           geminiHistory.push({
             role: role,
-            parts: [{ text: h.content.slice(0, 250) }]
+            parts: [{ text: cleanContent.slice(0, 500) }]
           });
         }
+      }
+
+      // Ensure geminiHistory ends with 'model' so that the subsequent chat.sendMessage(userPrompt)
+      // represents the next valid 'user' turn in the alternating turn structure.
+      while (geminiHistory.length > 0 && geminiHistory[geminiHistory.length - 1].role === 'user') {
+        geminiHistory.pop();
       }
 
       const chat = model.startChat({
@@ -460,7 +480,7 @@ ${context}
       const botReply = result.response.text();
 
       if (!botReply) {
-        return this.getFallbackResponse(question);
+        return this.getFallbackResponse(question, relevantDocs);
       }
 
       console.log('✅ Gemini RAG + Google Search response received');
@@ -468,7 +488,7 @@ ${context}
 
     } catch (error) {
       console.error('Error in Gemini query:', error.message);
-      return this.getFallbackResponse(question);
+      return this.getFallbackResponse(question, relevantDocs);
     }
   }
 
@@ -513,26 +533,56 @@ ${context}
     return formatted.trim();
   }
 
-  getFallbackResponse(question) {
-    const lowerQuestion = question.toLowerCase();
+  getFallbackResponse(question, relevantDocs = []) {
+    const lowerQuestion = (question || '').toLowerCase().trim();
     
-    if (/contact|phone|email|address|location|reach/i.test(lowerQuestion)) {
-      return "<strong>Contact Wacto</strong><br><br>📞 Phone: +91-8012666888<br>📧 Email: wecare@wacto.in<br>📍 Address: 85, Padmini, Gandhinagar, 1st main road, Adyar, Chennai<br><br><a href=\"https://wacto.in/contact-us/#enquiry-now\" target=\"_blank\">Contact Us / Book Demo</a>";
+    // 1. Greetings
+    if (/^(hi+|hello+|hey+|hola|namaste|good\s*(morning|afternoon|evening))\b/i.test(lowerQuestion)) {
+      return "Hello! 👋 Welcome to Wacto.<br><br>How can I help you today? You can ask me about WhatsApp Business API, Pricing, Chatbots, or book a demo!";
+    }
+
+    // 2. Contact details
+    if (/contact|phone|email|address|location|reach|office|call/i.test(lowerQuestion)) {
+      return "<strong>Contact Wacto Team</strong><br><br>• 📞 Phone: +91-8012666888<br>• 📧 Email: wecare@wacto.in<br>• 📍 Address: 85, Padmini, Gandhinagar, 1st main road, Adyar, Chennai, India<br><br><a href=\"https://wacto.in/contact-us/#enquiry-now\" target=\"_blank\">Book Demo / Contact Form</a>";
     }
     
-    if (/price|pricing|cost|plan|subscription/i.test(lowerQuestion)) {
-      return "<strong>Wacto Pricing Plans</strong><br><br>• Engage Plus - ₹2,299 /Monthly<br>• Automate Pro - ₹4,299 /Monthly<br>• Ultimate Business - Custom Pricing<br><br><a href=\"https://wacto.in/best-whatsapp-business-api-pricing-india/\" target=\"_blank\">View Full Pricing Details</a>";
+    // 3. Pricing plans
+    if (/price|pricing|cost|plan|subscription|tariff|charge|₹/i.test(lowerQuestion)) {
+      return "<strong>Wacto WhatsApp Business API Pricing</strong><br><br>• <strong>Starter / Engage Plus Plan</strong>: ₹2,299 /Monthly (WhatsApp API, basic automation, broadcast messaging)<br>• <strong>Growth / Automate Pro Plan</strong>: ₹4,299 /Monthly (Advanced chatbots, CRM integrations, multi-agent support)<br>• <strong>Enterprise Plan</strong>: Custom Pricing (Dedicated account manager, high volume messaging)<br>• <strong>Special Offer</strong>: Pay ₹999 & Unlock 500 FREE Messages.<br><br><a href=\"https://wacto.in/best-whatsapp-business-api-pricing-india/\" target=\"_blank\">View Full Pricing Plans</a>";
     }
 
-    if (/demo|video|watch/i.test(lowerQuestion)) {
-      return "<strong>Wacto Demos & Videos</strong><br><br>Visit our <a href=\"https://www.youtube.com/@wacto_official\" target=\"_blank\">YouTube Channel</a> for demo videos or <a href=\"https://wacto.in/contact-us/#enquiry-now\" target=\"_blank\">schedule a live demo call</a> with our team.";
+    // 4. Demo & Video
+    if (/demo|video|watch|book|schedule|appointment/i.test(lowerQuestion)) {
+      return "<strong>Wacto Demo & Video Guides</strong><br><br>• <strong>Live Demo Call</strong>: Schedule a 1-on-1 walkthrough with our product experts.<br>• <strong>YouTube Channel</strong>: Watch live feature demos and setup tutorials.<br><br><a href=\"https://wacto.in/contact-us/#enquiry-now\" target=\"_blank\">Schedule a Live Demo</a> | <a href=\"https://www.youtube.com/@wacto_official\" target=\"_blank\">Watch Demo Videos on YouTube</a>";
     }
 
-    if (/founder|founded|owner|ceo|durga|sekher/i.test(lowerQuestion)) {
-      return "<strong>About Wacto Founders</strong><br><br>Wacto was founded in Chennai by <strong>Sekher Durgalakshmi</strong> and <strong>Gunasekaran Rajendran</strong> to provide reliable WhatsApp Business API solutions.";
+    // 5. Founders & Leadership
+    if (/founder|founded|owner|ceo|durga|sekher|gunasekaran|who started/i.test(lowerQuestion)) {
+      return "<strong>About Wacto Founders</strong><br><br>Wacto was founded in Chennai by <strong>Sekher Durgalakshmi (Durga)</strong> and <strong>Gunasekaran Rajendran</strong> to empower businesses with official WhatsApp Business API automation and AI chatbots.<br><br><a href=\"https://wacto.in/about-wacto-whatsapp-business-api/\" target=\"_blank\">Read More About Wacto</a>";
     }
 
-    return "<strong>Wacto WhatsApp Business API</strong><br><br>Wacto helps businesses automate customer communication with official WhatsApp APIs, chatbots, bulk messaging, and CRM integrations.<br><br>Visit <a href=\"https://wacto.in\" target=\"_blank\">wacto.in</a> or contact <a href=\"mailto:wecare@wacto.in\">wecare@wacto.in</a> for more info.";
+    // 6. Integration & Features
+    if (/integrat|shopify|woocommerce|crm|webhook|api|tool/i.test(lowerQuestion)) {
+      return "<strong>Wacto Integrations & Tools</strong><br><br>• <strong>E-commerce</strong>: Seamlessly integrate with Shopify, WooCommerce, and OpenCart.<br>• <strong>CRMs & Webhooks</strong>: Connect with HubSpot, Zoho, and custom REST APIs.<br>• <strong>Lead Capture</strong>: Automated lead recovery, abandoned cart reminders, and payment updates.<br><br><a href=\"https://wacto.in/best-whatsapp-business-integration-services-in-india/\" target=\"_blank\">View Integration Services</a>";
+    }
+
+    // 7. Instagram automation
+    if (/instagram|insta|dm|story/i.test(lowerQuestion)) {
+      return "<strong>Wacto Instagram Automation</strong><br><br>• <strong>Automated DM Replies</strong>: Respond instantly to direct messages and story mentions.<br>• <strong>Lead Generation</strong>: Convert Instagram followers into qualified leads on WhatsApp.<br><br><a href=\"https://wacto.in/best-instagram-chatbot-for-business-in-india/\" target=\"_blank\">Explore Instagram Chatbot</a>";
+    }
+
+    // 8. Partnership
+    if (/partner|agency|reseller|commission|collaboration/i.test(lowerQuestion)) {
+      return "<strong>Wacto Partnership Program</strong><br><br>• Earn up to 30% recurring commission.<br>• Dedicated partner support and co-marketing opportunities.<br>• Ideal for digital marketing agencies, software vendors, and consultants.<br><br><a href=\"https://wacto.in/partnership/\" target=\"_blank\">Join Partnership Program</a>";
+    }
+
+    // 9. About Wacto / General overview from scraped knowledge
+    if (relevantDocs && relevantDocs.length > 0 && relevantDocs[0].score > 15) {
+      const topDoc = relevantDocs[0];
+      return `<strong>${topDoc.title || 'Wacto WhatsApp Business API'}</strong><br><br>Wacto (wacto.in) is India's leading WhatsApp Business API & AI Chatbot platform based in Chennai.<br><br>• <strong>Official WhatsApp API</strong>: Verified green tick setup and broadcast messaging.<br>• <strong>AI Chatbots</strong>: 24/7 automated customer support and lead generation.<br>• <strong>Multi-Agent Inbox</strong>: Shared team inbox with real-time analytics.<br>• <strong>CRM Integrations</strong>: Connects with Shopify, WooCommerce, and CRM tools.<br><br><a href="${topDoc.url || 'https://wacto.in'}" target="_blank">Visit Official Website</a>`;
+    }
+
+    return "<strong>Wacto WhatsApp Business API</strong><br><br>Wacto helps businesses automate customer communication with official WhatsApp APIs, chatbots, bulk messaging, and CRM integrations.<br><br>• 📞 Phone: +91-8012666888<br>• 📧 Email: wecare@wacto.in<br><br><a href=\"https://wacto.in\" target=\"_blank\">Visit wacto.in</a> | <a href=\"https://wacto.in/contact-us/#enquiry-now\" target=\"_blank\">Book a Demo</a>";
   }
 
   isWactoRelatedQuestion(question) {
