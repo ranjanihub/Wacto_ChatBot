@@ -436,20 +436,39 @@ ${context}
 
       // Prepare conversation history formatted for Gemini
       const geminiHistory = [];
-      for (const h of history.slice(-6)) {
-        const role = h.role === 'assistant' ? 'model' : 'user';
+      for (const h of history.slice(-8)) {
+        // Map frontend roles ('bot', 'assistant', 'model') to Gemini's 'model', otherwise 'user'
+        const role = (h.role === 'assistant' || h.role === 'bot' || h.role === 'model') ? 'model' : 'user';
         if (!h.content) continue;
+
+        // Gemini chat history MUST begin with a 'user' turn
         if (geminiHistory.length === 0 && role !== 'user') {
           continue;
         }
+
+        // Clean HTML tags and excessive whitespace from history
+        const cleanContent = h.content
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!cleanContent) continue;
+
         if (geminiHistory.length > 0 && geminiHistory[geminiHistory.length - 1].role === role) {
-          geminiHistory[geminiHistory.length - 1].parts[0].text += '\n' + h.content.slice(0, 250);
+          geminiHistory[geminiHistory.length - 1].parts[0].text += '\n' + cleanContent.slice(0, 500);
         } else {
           geminiHistory.push({
             role: role,
-            parts: [{ text: h.content.slice(0, 250) }]
+            parts: [{ text: cleanContent.slice(0, 500) }]
           });
         }
+      }
+
+      // Ensure geminiHistory ends with 'model' so that the subsequent chat.sendMessage(userPrompt)
+      // represents the next valid 'user' turn in the alternating turn structure.
+      while (geminiHistory.length > 0 && geminiHistory[geminiHistory.length - 1].role === 'user') {
+        geminiHistory.pop();
       }
 
       const chat = model.startChat({
